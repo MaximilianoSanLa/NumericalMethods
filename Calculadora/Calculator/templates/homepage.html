@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Calculadora Análisis Numérico</h1>
+<button onclick="mostrar_grafica()">Mostrar Gráfica</button>
+<div id="grafica"></div> 
+</body>
+<script>
+    function mostrar_grafica(){
+        var img = document.createElement("img");
+        img.src = "{% url 'funcion' %}";
+
+        var contenedor = document.getElementById("grafica");
+        contenedor.innerHTML = "";
+
+        contenedor.appendChild(img);
+    }
+</script>
+</html>
