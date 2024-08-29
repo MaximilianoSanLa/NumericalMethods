@@ -41,7 +41,7 @@ def funcion(request):
     f = sp.lambdify(var, expr, modules=["numpy"])
     x_vals = np.linspace(-10, 10, 400)
     y_vals = f(x_vals)
-    plt.figure(figsize=(6, 4))
+    plt.figure(figsize=(4, 4))
     plt.plot(x_vals, y_vals, label=f"{var} = {ecuacion}")
     
     plt.title(f"Graph of the function {var} = {ecuacion}")
