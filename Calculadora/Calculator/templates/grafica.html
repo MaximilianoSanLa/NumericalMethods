@@ -9,16 +9,34 @@
 </head>
 <body>
     <div class="container">
-        <h1>Grafíca</h1>
-        <div>
-            <img src="data:image/png;base64,{{ buffer }}">
+        <h1>Graph Visualization</h1>
+
+        <div class="results">
+            <img src="data:image/png;base64,{{buffer}}" alt="Function Graph">
+            <div class="results-info">
+                <p>Interval Start (a): {{a}}</p>
+                <p>Interval End (b): {{b}}</p>
+                <p>Number of Iterations: {{iter}}</p>
+                <p>Error: {{error}}</p>
+            </div>
         </div>
-        <div> 
-            <form method="GET" action="{% url 'funcion' %}">
+
+        <div class="form-section">
+            <form method="GET" action="{% url 'fun_bisection' %}">
                 <div class="input-group">
-                    <label for="function">Enter a mathematical function:</label>
-                    <input type="text" id="function" name="function" placeholder="e.g. 2*x**2 + 3*x + 1" required>
-                    <label for="variable">Select a variable:</label>
+                    <label for="a">Start of the Interval:</label>
+                    <input type="text" id="a" name="a" placeholder="e.g. 1.0" required>
+                    
+                    <label for="b">End of the Interval:</label>
+                    <input type="text" id="b" name="b" placeholder="e.g. 2.0" required>
+                    
+                    <label for="tolerance">Tolerance:</label>
+                    <input type="text" id="tolerance" name="tolerance" placeholder="e.g. 1e-7" required>
+                    
+                    <label for="function">Mathematical Function:</label>
+                    <input type="text" id="function" name="function" placeholder="e.g. sin(x) + exp(-x)" required>
+                    
+                    <label for="variable">Variable:</label>
                     <select id="variable" name="variable">
                         <option value="x">x</option>
                         <option value="y">y</option>
@@ -28,6 +46,5 @@
             </form>
         </div>
     </div>
-
 </body>
 </html>

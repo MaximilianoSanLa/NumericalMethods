@@ -11,9 +11,12 @@
 
     <div class="container">
         <h1>Numerical Methods</h1>
-        <form method="GET" action="{% url 'funcion' %}">
+        <form method="GET" action="{% url 'fun_bisection' %}">
             <div class="input-group">
                 <label for="function">Enter a mathematical function:</label>
+                <input type="text" id="a" name="a" placeholder="start of the interval" required>
+                <input type="text" id="b" name="b" placeholder="end of the interval" required>
+                <input type="text" id="tolerance" name="tolerance" placeholder="tolerance" required>
                 <input type="text" id="function" name="function" placeholder="e.g. 2*x**2 + 3*x + 1" required>
                 <label for="variable">Select a variable:</label>
                 <select id="variable" name="variable">
