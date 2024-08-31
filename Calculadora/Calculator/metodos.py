@@ -64,6 +64,7 @@ def bisection(a, b, function, tolerance, variable):
     new_a = float(a)
     new_b = float(b)
     tolerance = float(tolerance)
+    expr = sp.sympify(function) 
     f = sp.lambdify(variable, function, modules=["numpy"])
     cumple = 0
     iter = 1
@@ -75,9 +76,10 @@ def bisection(a, b, function, tolerance, variable):
         
         if fa * fc < 0:
             new_b = c
-        else:
+        elif fc * fb < 0:
             new_a = c
-        
+        else:
+            return None, None, iter, "there is no root in the interval entered for this function"
         error = (new_b - new_a)/2
         if(error <= tolerance):
             cumple  = 1
@@ -87,4 +89,6 @@ def bisection(a, b, function, tolerance, variable):
     if cumple == 1:
         scientific_notation = "{:.5e}".format(error)
         return new_a, new_b, iter, scientific_notation
+    else:
+        return None, None, iter, "No convergence within the maximum number of iterations"
         

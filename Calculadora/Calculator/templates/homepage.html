@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>Numerical Methods</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
@@ -11,12 +12,18 @@
 
     <div class="container">
         <h1>Numerical Methods</h1>
-        <form method="GET" action="{% url 'fun_bisection' %}">
+        <button id="show_bisection_method_form">Bisection Method</button>
+
+        <form id="bisection_method_form">
+            {% csrf_token %}
             <div class="input-group">
-                <label for="function">Enter a mathematical function:</label>
+                <label for="function">Enter the start of the interval:</label>
                 <input type="text" id="a" name="a" placeholder="start of the interval" required>
+                <label for="function">Enter the end of the interval:</label>
                 <input type="text" id="b" name="b" placeholder="end of the interval" required>
+                <label for="function">Enter tolerance:</label>
                 <input type="text" id="tolerance" name="tolerance" placeholder="tolerance" required>
+                <label for="function">Enter a mathematical function:</label>
                 <input type="text" id="function" name="function" placeholder="e.g. 2*x**2 + 3*x + 1" required>
                 <label for="variable">Select a variable:</label>
                 <select id="variable" name="variable">
@@ -26,7 +33,11 @@
             </div>
             <button type="submit" class="btn">Show Graph</button>
         </form>
+
+        <div id ="result"></div>
+        <div id = "graph"></div>
     </div>
 
+    <script src="{% static 'js/homepage.js' %}"></script>
 </body>
 </html>

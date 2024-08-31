@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from .models import metodo
 from .metodos import *
@@ -11,6 +11,7 @@ matplotlib.use("Agg")
 import numpy as np
 import base64
 import sympy as sp
+import json
 
 def Calculator(request):
     nombre = metodo.objects.all()
@@ -21,12 +22,13 @@ def Calculator(request):
     return HttpResponse(template.render(context, request))
 
 def fun_bisection(request):
-    template = loader.get_template("grafica.html")
-    function = request.GET.get('function', '2*x + 1') 
-    variable = request.GET.get("variable")
-    a = request.GET.get("a")
-    b = request.GET.get("b")
-    tolerance = request.GET.get("tolerance")
+    data = json.loads(request.body)
+    a = data["a"]
+    b = data["b"]
+    tolerance = data["tolerance"]
+    function = data["function"]
+    variable = data["variable"]
+    
     
     try:
         new_a, new_b, iter, error = bisection(a, b, function, tolerance, variable)
@@ -36,10 +38,12 @@ def fun_bisection(request):
 
     context = {
         'buffer': image_base64,
-        "a": new_a,
-        "b": new_b,
-        "iter": iter,
-        "error": error
+        "result": {
+            "a": new_a,
+            "b": new_b,
+            "iter": iter,
+            "error": error
+        }
     }
 
-    return HttpResponse(template.render(context, request))
+    return JsonResponse(context)
