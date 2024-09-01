@@ -7,6 +7,7 @@ import io
 import matplotlib.pyplot as plt
 import numpy as np
 import base64
+import sympy as sp
 
 def Calculator(request):
     nombre = metodo.objects.all()
@@ -20,20 +21,30 @@ def Calculator(request):
 def funcion(request):
     template = loader.get_template("grafica.html")
     ecuacion = request.GET.get('function', '2*x + 1') 
-
-    x = np.linspace(-10, 10, 400)
+    variable = request.GET.get("variable")
     
     try:
-        y = eval(ecuacion)
-    except Exception as e:
-        return HttpResponse(f"Error al evaluar la función: {e}")
-
-    plt.figure(figsize=(6, 4))
-    plt.plot(x, y, label=f"y = {ecuacion}")
+        expr = sp.sympify(ecuacion) 
+    except sp.SympifyError:
+        return HttpResponse("The function is not valid.")
     
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.title(f"Gráfica de la función y = {ecuacion}")
+    if variable == "x":
+        x = sp.symbols("x")
+        var = x
+        plt.xlabel("x")
+        plt.ylabel("y")
+    else:
+        y = sp.symbols("y")
+        var = y
+        plt.xlabel("y")
+        plt.ylabel("x")
+    f = sp.lambdify(var, expr, modules=["numpy"])
+    x_vals = np.linspace(-10, 10, 400)
+    y_vals = f(x_vals)
+    plt.figure(figsize=(4, 4))
+    plt.plot(x_vals, y_vals, label=f"{var} = {ecuacion}")
+    
+    plt.title(f"Graph of the function {var} = {ecuacion}")
     plt.legend()
     plt.grid(True)
     
