@@ -69,12 +69,13 @@ def bisection(a, b, function, tolerance, variable):
     cumple = 0
     iter = 1
     table = []
+    error = 0
     while cumple == 0 and iter <= 100:
         c = new_a + ((new_b - new_a)/2)
         fa = f(new_a)
         fb = f(new_b)
         fc = f(c)
-        
+        table.append([new_a, c, new_b, fa, fc, error])
         if fa * fc < 0:
             new_b = c
         elif fc * fb < 0:
@@ -84,10 +85,10 @@ def bisection(a, b, function, tolerance, variable):
         error = (new_b - new_a)/2
         if(error <= tolerance):
             cumple  = 1
+            table.append([new_a, c, new_b, fa, fc, error])
         else:
             cumple = 0
         iter +=1
-        table.append([new_a, c, new_b, fa, fc, error])
     if cumple == 1:
         scientific_notation = "{:.5e}".format(error)
         return c, iter, scientific_notation, table

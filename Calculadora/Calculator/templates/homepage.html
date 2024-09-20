@@ -10,13 +10,16 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <!-- Logo a la izquierda -->
         <a class="navbar-brand" href="#">
           <img src="ruta-del-logo" alt="Logo" style="height: 40px;">
         </a>
       
         <div class="text-center">
             <h1>Numerical Methods</h1>
+        </div>
+
+        <div>
+            <button id="graph_function" class = "btn">Graph function</button>
         </div>
       
         <div class="collapse navbar-collapse" id="navbarMenu">
@@ -26,7 +29,7 @@
                   Methods
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <button id="show_bisection_method_form">Bisection Method</button>
+                    <button id="show_bisection_method_form" class = "btn">Bisection Method</button>
                     <a class="dropdown-item" href="#">Opción 2</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">Opción 3</a>
@@ -39,15 +42,15 @@
         <form id="bisection_method_form" style="display: none;">
             {% csrf_token %}
             <div class="form-group">
-                <label for="function">Enter the start of the interval:</label>
+                <label for="a">Enter the start of the interval:</label>
                 <input type="text" id="a" name="a" placeholder="start of the interval" required>
             </div>
             <div class = "form-group">
-                <label for="function">Enter the end of the interval:</label>
+                <label for="b">Enter the end of the interval:</label>
                 <input type="text" id="b" name="b" placeholder="end of the interval" required>
             </div>
             <div>
-                <label for="function">Enter tolerance:</label>
+                <label for="tolerance">Enter tolerance:</label>
                 <input type="text" id="tolerance" name="tolerance" placeholder="tolerance" required>
             </div>
             <div class = "form-group">
@@ -63,26 +66,23 @@
             </div>
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
+        <form id="graph_function_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="function">Enter the start of the interval:</label>
+                <input type="text" id="a" name="a" placeholder="start of the interval" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
         <div id ="result"></div>
         <div id = "graph"></div>
-        <table id="tabla-resultados" border="1" style="display: none;">
-            <thead>
-                <tr>
-                    <th>a</th>
-                    <th>c</th>
-                    <th>b</th>
-                    <th>"(a)</th>
-                    <th>f(c)</th>
-                    <th>Error</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <div id= "table"></div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/homepage.js' %}"></script>
+
 </body>
 </html>
+
