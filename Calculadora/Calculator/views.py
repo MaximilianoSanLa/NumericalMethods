@@ -29,9 +29,9 @@ def fun_bisection(request):
     function = data["function"]
     variable = data["variable"]
     
-    
     try:
-        new_a, new_b, iter, error = bisection(a, b, function, tolerance, variable)
+        c, iter, error, table = bisection(a, b, function, tolerance, variable)
+        
     except Exception as e:
         return HttpResponse(f"Error in bisection method: {e}")
     image_base64 = graph(function, variable)
@@ -39,11 +39,10 @@ def fun_bisection(request):
     context = {
         'buffer': image_base64,
         "result": {
-            "a": new_a,
-            "b": new_b,
+            "root_result" : c,
             "iter": iter,
-            "error": error
+            "error": error,
+            "table": table
         }
     }
-
     return JsonResponse(context)

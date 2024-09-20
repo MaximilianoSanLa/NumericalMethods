@@ -68,6 +68,7 @@ def bisection(a, b, function, tolerance, variable):
     f = sp.lambdify(variable, function, modules=["numpy"])
     cumple = 0
     iter = 1
+    table = []
     while cumple == 0 and iter <= 100:
         c = new_a + ((new_b - new_a)/2)
         fa = f(new_a)
@@ -86,9 +87,9 @@ def bisection(a, b, function, tolerance, variable):
         else:
             cumple = 0
         iter +=1
+        table.append([new_a, c, new_b, fa, fc, error])
     if cumple == 1:
         scientific_notation = "{:.5e}".format(error)
-        return new_a, new_b, iter, scientific_notation
+        return c, iter, scientific_notation, table
     else:
         return None, None, iter, "No convergence within the maximum number of iterations"
-        
