@@ -1,9 +1,21 @@
 const bisection_method_button = document.getElementById("show_bisection_method_form");
 const bisection_method_form = document.getElementById("bisection_method_form");
+const graph_function_form = document.getElementById("graph_function_form");
+const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+let tolerance;
+let variable;
+let func;
 
+// Display the bisection method form
 bisection_method_button.addEventListener("click", function(e){
    e.preventDefault();
    bisection_method_form.style.display = "block";
+});
+
+// Display the show graph form 
+document.getElementById("graph_function").addEventListener("click", function(e) {
+    e.preventDefault();
+    graph_function_form.style.display = "block";
 });
 
 //Bisection method
@@ -12,10 +24,9 @@ document.getElementById("bisection_method_form").addEventListener("submit", func
 
    let a = document.getElementById("a").value;
    let b = document.getElementById("b").value;
-   let tolerance = document.getElementById("tolerance").value;
-   let func = document.getElementById("function").value;
-   let variable = document.getElementById("variable").value;
-   const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+   tolerance = document.getElementById("tolerance").value;
+   func = document.getElementById("function_bisection_method").value;
+   variable = document.getElementById("variable").value;
 
    fetch("/Calculator/fun_bisection/", {
        method: "POST",
@@ -33,7 +44,6 @@ document.getElementById("bisection_method_form").addEventListener("submit", func
    })
    .then(response => response.json())
    .then(data => {
-        console.log(data)
         let root_result = document.createElement("p");
         let iter_result = document.createElement("p");
         let error_result = document.createElement("p");
@@ -60,11 +70,32 @@ document.getElementById("bisection_method_form").addEventListener("submit", func
 
 });
 
-document.getElementById("graph_function").addEventListener("click", function(e){
+//Show graph
+graph_function_form.addEventListener("submit", function(e){
     e.preventDefault();
-    document.getElementById("graph").innerHTML = `<img src="data:image/png;base64, ${data.buffer}" />`;
 
-})
+    let func = document.getElementById("function_graph_function").value;
+    variable =document.getElementById("variable").value
+
+    fetch("/Calculator/graph_function/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            function: func,
+            variable: variable
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        document.getElementById("graph").innerHTML = `<img src="data:image/png;base64, ${data.image}" />`;
+    })
+    .catch(error => console.log("Error: ", error))
+    graph_function_form.style.display = "none";
+});
 function create_table(data, method) {
     const table = document.createElement('table');
     table.classList.add('table', 'table-bordered', 'table-striped', 'table-hover');

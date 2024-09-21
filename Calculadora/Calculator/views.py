@@ -35,7 +35,6 @@ def fun_bisection(request):
     except Exception as e:
         return HttpResponse(f"Error in bisection method: {e}")
     image_base64 = graph(function, variable)
-
     context = {
         'buffer': image_base64,
         "result": {
@@ -46,3 +45,14 @@ def fun_bisection(request):
         }
     }
     return JsonResponse(context)
+
+def graph_function(request):
+    data = json.loads(request.body)
+    function = data["function"]
+    variable = data["variable"]
+
+    try:
+        image = graph(function, variable)
+        return JsonResponse({'image': image})
+    except Exception as e:
+        return HttpResponse(f"Error showing the graph: {e}")

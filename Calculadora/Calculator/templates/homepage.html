@@ -54,8 +54,8 @@
                 <input type="text" id="tolerance" name="tolerance" placeholder="tolerance" required>
             </div>
             <div class = "form-group">
-                <label for="function">Enter a mathematical function:</label>
-                <input type="text" id="function" name="function" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+                <label for="function_bisection_method">Enter a mathematical function:</label>
+                <input type="text" id="function_bisection_method" name="function_bisection_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
             </div>
             <div class = "form-group">
                 <label for="variable">Select a variable:</label>
@@ -66,11 +66,19 @@
             </div>
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
+
         <form id="graph_function_form" style="display: none;">
             {% csrf_token %}
             <div class="form-group">
-                <label for="function">Enter the start of the interval:</label>
-                <input type="text" id="a" name="a" placeholder="start of the interval" required>
+                <label for="function_graph_function">Enter a mathematical function:</label>
+                <input type="text" id="function_graph_function" name="function_graph_function" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <div class = "form-group">
+                <label for="variable">Select a variable:</label>
+                <select id="variable" name="variable">
+                    <option value="x">x</option>
+                    <option value="y">y</option>
+                </select>
             </div>
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
