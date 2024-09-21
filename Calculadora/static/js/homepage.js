@@ -10,6 +10,8 @@ let func;
 bisection_method_button.addEventListener("click", function(e){
    e.preventDefault();
    bisection_method_form.style.display = "block";
+   graph_function_form.style.display = "none";
+
 });
 
 // Display the show graph form 
@@ -44,25 +46,31 @@ document.getElementById("bisection_method_form").addEventListener("submit", func
    })
    .then(response => response.json())
    .then(data => {
-        let root_result = document.createElement("p");
-        let iter_result = document.createElement("p");
-        let error_result = document.createElement("p");
-        root_result.innerHTML = `Root: ${data.result.root_result}`;
-        iter_result.innerHTML = `Iterations: ${data.result.iter}`;
-        error_result.innerHTML = `Error: ${data.result.error}`;
-
-        let resultContainer = document.getElementById("result");
-        resultContainer.innerHTML = "";
-        resultContainer.appendChild(root_result);
-        resultContainer.appendChild(iter_result);
-        resultContainer.appendChild(error_result);
-
-        document.getElementById("graph").innerHTML = `<img src="data:image/png;base64, ${data.buffer}" />`;
-        const existing_table = document.getElementById("iterations_table");
-        if (existing_table) {
-            existing_table.remove();
+        let result_container = document.getElementById("result");
+        result_container.innerHTML = "";
+        if (data.type == 1) {
+            let result = document.createElement("p");
+            result.innerHTML = data.result;
+            result_container.appendChild(result);
         }
-        create_table(data.result.table, "bisection");
+        else {
+            let root_result = document.createElement("p");
+            let iter_result = document.createElement("p");
+            let error_result = document.createElement("p");
+
+            root_result.innerHTML = `Root: ${data.result.root_result}`;
+            iter_result.innerHTML = `Iterations: ${data.result.iter}`;
+            error_result.innerHTML = `Error: ${data.result.error}`;
+            result_container.appendChild(root_result);
+            result_container.appendChild(iter_result);
+            result_container.appendChild(error_result);
+            const existing_table = document.getElementById("iterations_table");
+            if (existing_table) {
+                existing_table.remove();
+            }
+            create_table(data.result.table, "bisection");
+        }
+        document.getElementById("graph").innerHTML = `<img src="data:image/png;base64, ${data.buffer}" />`;
    })
    .catch(error => console.log("Error: ", error));
 

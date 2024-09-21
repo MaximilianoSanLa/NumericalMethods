@@ -19,7 +19,8 @@ def validate_function(function):
     except sp.SympifyError:
         response = 2
         return response
-    
+
+# Graph function
 def graph(function, variable):
     try:
         expr = sp.sympify(function) 
@@ -34,7 +35,7 @@ def graph(function, variable):
     y_vals = f(x_vals)
     
     plt.ioff()
-    plt.figure(figsize=(4, 4))
+    plt.figure(figsize=(5, 5))
     plt.plot(x_vals, y_vals, label=f"y = {function}", color='blue')
     plt.axhline(0, color='black', linewidth=1) 
     plt.axvline(0, color='black', linewidth=1)  
@@ -60,12 +61,16 @@ def graph(function, variable):
 
     return image
     
+# Bisection method function
 def bisection(a, b, function, tolerance, variable):
     new_a = float(a)
     new_b = float(b)
+    if not root_existence(new_a, new_b, function, variable):
+        return False
+    
     tolerance = float(tolerance)
     expr = sp.sympify(function) 
-    f = sp.lambdify(variable, function, modules=["numpy"])
+    f = sp.lambdify(variable, expr, modules=["numpy"])
     cumple = 0
     iter = 1
     table = []
@@ -94,3 +99,21 @@ def bisection(a, b, function, tolerance, variable):
         return c, iter, scientific_notation, table
     else:
         return None, None, iter, "No convergence within the maximum number of iterations"
+    
+# Verify the root existence
+def root_existence(a, b, fun, var):
+    f = symplified_function(fun, var)
+    fa = f(a)
+    fb = f(b)
+    
+    if fa*fb < 0:
+        return True
+    else:
+        return False
+    
+
+def symplified_function(fun, var):
+    expr = sp.sympify(fun) 
+    variable = sp.symbols(var)
+    function = sp.lambdify(variable, expr, modules=["numpy"])
+    return function

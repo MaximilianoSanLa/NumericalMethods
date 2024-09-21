@@ -28,13 +28,20 @@ def fun_bisection(request):
     tolerance = data["tolerance"]
     function = data["function"]
     variable = data["variable"]
+    image_base64 = graph(function, variable)
     
     try:
+        if not bisection(a, b, function, tolerance, variable):
+            context = {
+                "result": f"There is no roots in this interval [{a}, {b}]",
+                "type": 1,
+                "buffer": image_base64
+            }
+            return JsonResponse(context)
         c, iter, error, table = bisection(a, b, function, tolerance, variable)
         
-    except Exception as e:
+    except Exception as e:  
         return HttpResponse(f"Error in bisection method: {e}")
-    image_base64 = graph(function, variable)
     context = {
         'buffer': image_base64,
         "result": {
@@ -42,7 +49,8 @@ def fun_bisection(request):
             "iter": iter,
             "error": error,
             "table": table
-        }
+        },
+        "type": 2
     }
     return JsonResponse(context)
 
