@@ -12,24 +12,35 @@ import numpy as np
 import base64
 import sympy as sp
 
+# valite function
 def validate_function(function):
     try:
         function = sp.sympify(function) 
-        response = 1
+        return True
     except sp.SympifyError:
-        response = 2
-        return response
+        return False
 
-# Graph function
-def graph(function, variable):
-    try:
-        expr = sp.sympify(function) 
-        
-    except sp.SympifyError:
-        return HttpResponse("The function is not valid.")
+# Function to symplify an algebraic expression    
+def symplified_function(fun):
+    expr = sp.sympify(fun) 
+    variable = sp.symbols("x")
+    function = sp.lambdify(variable, expr, modules=["numpy"])
+    return function
+
+# Function to verify the root existence in a given interval
+def root_existence(a, b, fun):
+    f = symplified_function(fun)
+    fa = f(a)
+    fb = f(b)
     
-    var = sp.symbols(variable)
-    f = sp.lambdify(var, expr, modules=["numpy"])
+    if fa*fb < 0:
+        return True
+    else:
+        return False
+
+# Function to graph a algebraic function
+def graph(function):
+    f = symplified_function(function)
     
     x_vals = np.linspace(-10, 10, 400)
     y_vals = f(x_vals)
@@ -60,73 +71,116 @@ def graph(function, variable):
     image = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
     return image
+
+# Incremental search function
+def incremental_search(f, x0, delta, N):
+    f = symplified_function(f)
+    table = []
+    for i in range(N):
+        
+        x1 = x0+delta
+        if f(x0)*f(x1) < 0:
+            table.append(f"There is a root of f in {x0}, {x1}")
+        x0 = x1
+    return table
     
 # Bisection method function
-def bisection(a, b, function, tolerance, variable):
-    new_a = float(a)
-    new_b = float(b)
-    if not root_existence(new_a, new_b, function, variable):
-        return False
-    
-    tolerance = float(tolerance)
+def bisection(a, b, function, tolerance, N):
+    if not validate_function(function):
+        return "invalid_function"
+    new_a = a
+    new_b = b
+    N = int(N)
+    if not root_existence(new_a, new_b, function):
+        return "no root in the interval"
     expr = sp.sympify(function) 
-    f = sp.lambdify(variable, expr, modules=["numpy"])
+    f = sp.lambdify("x", expr, modules=["numpy"])
     cumple = 0
-    iter = 0
+    iteration = 0
     table = []
     error = 0
-    print(new_a, new_b, tolerance, f)
-    while cumple == 0 and iter < 100:
+    
+    while cumple == 0 and iteration < N:
         c = new_a + ((new_b - new_a)/2)
         fa = f(new_a)
         fb = f(new_b)
         fc = f(c)
-        table.append([iter,new_a, c, new_b, fa, fc, error])
+        
+        if iteration == 0:
+            error = 0
+            table.append([iteration,new_a, c, new_b, "{:.5e}".format(fa), "{:.5e}".format(fc), error])
+        else:
+            error = abs(c-c_previous)
+            if error <= tolerance:
+                cumple = 1
+            else: 
+                cumple = 0
+            table.append([iteration, new_a, c, new_b, "{:.5e}".format(fa), "{:.5e}".format(fc), "{:.5e}".format(error)])
         if fa * fc < 0:
             new_b = c
-        elif fc * fb < 0:
+        else:
             new_a = c
-        else:
-            return None, None, iter, "there is no root in the interval entered for this function"
-        error = (new_b - new_a)/2
-        if(error <= tolerance):
-            cumple  = 1
-            table.append([iter, new_a, c, new_b, fa, fc, error])
-        else:
-            cumple = 0
-        iter +=1
+            
+        iteration +=1
+        c_previous = c 
     if cumple == 1:
         scientific_notation = "{:.5e}".format(error)
-        return c, iter, scientific_notation, table
+        return c, iteration, scientific_notation, table
     else:
-        return None, None, iter, "No convergence within the maximum number of iterations"
+        return "no convergence", table
     
-    
-    
-# Verify the root existence
-def root_existence(a, b, fun, var):
-    f = symplified_function(fun, var)
-    fa = f(a)
-    fb = f(b)
-    
-    if fa*fb < 0:
-        return True
+# Regla Falsa 
+def regla_falsa(function, a, b, tolerance, N):
+    if not validate_function(function):
+        return "invalid_function"
+    f = symplified_function(function)
+    if not root_existence(a, b, function):
+        return "no root in the interval"
+    error = 0
+    table = [] 
+    cumple = 0
+    iteration = 1
+    c = (f(b)*a-f(a)*b)/(f(b)-f(a))
+    table.append([0, a, c, b, "{:.5e}".format(f(c)), error])
+    if f(c) == 0:
+        cumple = 1
+    if f(a)*f(c) < 0:
+        new_a = a
+        new_b = c
     else:
-        return False
+        new_a = c
+        new_b = b
+    c_previous = c
     
-
-def symplified_function(fun, var):
-    expr = sp.sympify(fun) 
-    variable = sp.symbols(var)
-    function = sp.lambdify(variable, expr, modules=["numpy"])
-    return function
+    while cumple == 0 and iteration < N:
+        c = ((f(new_b)*new_a)-(f(new_a)*new_b))/(f(new_b)-f(new_a))
+        error = abs(c-c_previous)
+        
+        if error <= tolerance:
+            cumple = 1
+        else:
+            cumple = 0
+        table.append([iteration, new_a, c, new_b, "{:.5e}".format(f(c)), "{:.5e}".format(error)])
+        if f(a)*f(c) < 0:
+            new_a = new_a
+            new_b = c
+        else:
+            new_a = c
+            new_b = new_b
+        c_previous = c
+        iteration += 1
+    if cumple == 1:
+        scientific_notation = "{:.5e}".format(error)
+        return c, iteration, scientific_notation, table
+    else:
+        return "no convergence", table
 
 # Newton method
-def newton_method(x0,tolerance, function, variable):
+def newton_method(x0,tolerance, function):
     x0 = float(x0)
     tolerance = float(tolerance)
     x0_anterior = x0
-    var =sp.symbols(variable)
+    var =sp.symbols("x")
     expr = sp.sympify(function)  
     f = sp.lambdify(var, expr, modules=["numpy"])
     df_expr = sp.diff(expr, var) 

@@ -27,17 +27,49 @@
                   Methods
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <button id="show_bisection_method_form" class = "btn">Bisection Method</button>
+                    <button id="show_incremental_search_method_form" class = "btn">Incremental_search</button>
                     <div class="dropdown-divider"></div>
-                    <button id="show_newton_method_form" class = "btn">Newton Method</button>
+                    <button id="show_bisection_method_form" class = "btn">Bisection</button>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Opción 3</a>
+                    <button id="show_regla_falsa_method_form" class = "btn">Regla Falsa</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_punto_fijo_method_method_form" class = "btn">Punto fijo</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_newton_method_form" class = "btn">Newton</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_secant_method_form" class = "btn">Secant</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_multiple_roots_method_form" class = "btn">Multiple roots</button>
+                    
                 </div>                
               </li>
             </ul>
           </div>
       </nav>
     <div class="container">
+
+        {% comment %} Show Incremental search method form {% endcomment %}
+        <form id="incremental_search_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="function_incremental_search_method">Enter a mathematical function::</label>
+                <input type="text" id="function_incremental_search_method" name="function_incremental_search_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <div>
+                <label for="x0_incremental_search_method">Enter an initial value</label>
+                <input type="text" id="x0_incremental_search_method" name="x0_incremental_search_method" placeholder="initial x0" required>
+            </div>
+            <div class = "form-group">
+                <label for="delta_incremental_search_method">Enter △:</label>
+                <input type="text" id="delta_incremental_search_method" name="delta_incremental_search_method" placeholder="Enter △" required>
+            </div>
+            <div class = "form-group">
+                <label for="N_incremental_search_method">Enter a number for max iterations: (the default is 100)</label>
+                <input type="text" id="N_incremental_search_method" name="N_incremental_search_method" placeholder="100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
         {% comment %} Show Bisection method form {% endcomment %}
         <form id="bisection_method_form" style="display: none;">
             {% csrf_token %}
@@ -58,11 +90,34 @@
                 <input type="text" id="function_bisection_method" name="function_bisection_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
             </div>
             <div class = "form-group">
-                <label for="variable_bisection_method">Select a variable:</label>
-                <select id="variable_bisection_method" name="variable_bisection_method">
-                    <option value="x">x</option>
-                    <option value="y">y</option>
-                </select>
+                <label for="N_bisection_method">Enter a number for max iterations: (the default is 100)</label>
+                <input type="text" id="N_bisection_method" name="N_bisection_method" placeholder="100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
+        {% comment %} Show regla falsa method form {% endcomment %}
+        <form id="regla_falsa_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class = "form-group">
+                <label for="function_regla_falsa_form">Enter a mathematical function:</label>
+                <input type="text" id="function_regla_falsa_form" name="function_regla_falsa_form" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <div class = "form-group">
+                <label for="a_regla_falsa_form_method">Enter the start of the interval:</label>
+                <input type="text" id="a_regla_falsa_form_method" name="a_regla_falsa_form_method" placeholder="start of the interval" required>
+            </div>
+            <div class = "form-group">
+                <label for="b_regla_falsa_form_method">Enter the end of the interval:</label>
+                <input type="text" id="b_regla_falsa_form_method" name="b_regla_falsa_form_method" placeholder="end of the interval" required>
+            </div>
+            <div>
+                <label for="tolerance_regla_falsa_method">Enter tolerance:</label>
+                <input type="text" id="tolerance_regla_falsa_method" name="tolerance_regla_falsa_method" placeholder="tolerance" required>
+            </div>
+            <div class = "form-group">
+                <label for="N_regla_falsa_method">Enter a number for max iterations: (the default is 100)</label>
+                <input type="text" id="N_regla_falsa_method" name="N_regla_falsa_method" placeholder="100" required>
             </div>
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
@@ -73,13 +128,6 @@
             <div class="form-group">
                 <label for="function_graph_function">Enter a mathematical function:</label>
                 <input type="text" id="function_graph_function" name="function_graph_function" placeholder="e.g. 2*x**2 + 3*x + 1" required>
-            </div>
-            <div class = "form-group">
-                <label for="variable_graph_function">Select a variable:</label>
-                <select id="variable_graph_function" name="variable">
-                    <option value="x">x</option>
-                    <option value="y">y</option>
-                </select>
             </div>
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
@@ -98,13 +146,6 @@
             <div class="form-group">
                 <label for="tolerance_newton_method">Enter tolerance: </label>
                 <input type="text" id="tolerance_newton_method" name="tolerance_newton_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
-            </div>
-            <div class = "form-group">
-                <label for="variable_newton_method">Select a variable:</label>
-                <select id="variable_newton_method" name="variable_newton_method">
-                    <option value="x">x</option>
-                    <option value="y">y</option>
-                </select>
             </div>
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
