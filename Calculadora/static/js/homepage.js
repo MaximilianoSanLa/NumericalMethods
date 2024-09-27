@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
         graph_function_form.style.display = "none";
         incremental_search_method_form.style.display = "none";
         regla_falsa_method_form.style.display = "none";
-
     }
 
     // Display the incremental search method form
@@ -67,7 +66,8 @@ document.addEventListener("DOMContentLoaded", function() {
         N = parseInt(document.getElementById("N_incremental_search_method").value);
     
         if (N < 0) {
-        alert("N can not be less than 0")
+            alert("N can not be less than 0")
+            return 
         }
     
     
@@ -412,6 +412,4 @@ document.addEventListener("DOMContentLoaded", function() {
         const result_container = document.getElementById("table");
         result_container.appendChild(table);
     }
-    
 });
-
