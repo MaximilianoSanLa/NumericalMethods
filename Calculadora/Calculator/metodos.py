@@ -72,15 +72,16 @@ def bisection(a, b, function, tolerance, variable):
     expr = sp.sympify(function) 
     f = sp.lambdify(variable, expr, modules=["numpy"])
     cumple = 0
-    iter = 1
+    iter = 0
     table = []
     error = 0
-    while cumple == 0 and iter <= 100:
+    print(new_a, new_b, tolerance, f)
+    while cumple == 0 and iter < 100:
         c = new_a + ((new_b - new_a)/2)
         fa = f(new_a)
         fb = f(new_b)
         fc = f(c)
-        table.append([new_a, c, new_b, fa, fc, error])
+        table.append([iter,new_a, c, new_b, fa, fc, error])
         if fa * fc < 0:
             new_b = c
         elif fc * fb < 0:
@@ -90,7 +91,7 @@ def bisection(a, b, function, tolerance, variable):
         error = (new_b - new_a)/2
         if(error <= tolerance):
             cumple  = 1
-            table.append([new_a, c, new_b, fa, fc, error])
+            table.append([iter, new_a, c, new_b, fa, fc, error])
         else:
             cumple = 0
         iter +=1
@@ -99,6 +100,8 @@ def bisection(a, b, function, tolerance, variable):
         return c, iter, scientific_notation, table
     else:
         return None, None, iter, "No convergence within the maximum number of iterations"
+    
+    
     
 # Verify the root existence
 def root_existence(a, b, fun, var):
@@ -117,3 +120,44 @@ def symplified_function(fun, var):
     variable = sp.symbols(var)
     function = sp.lambdify(variable, expr, modules=["numpy"])
     return function
+
+# Newton method
+def newton_method(x0,tolerance, function, variable):
+    x0 = float(x0)
+    tolerance = float(tolerance)
+    x0_anterior = x0
+    var =sp.symbols(variable)
+    expr = sp.sympify(function)  
+    f = sp.lambdify(var, expr, modules=["numpy"])
+    df_expr = sp.diff(expr, var) 
+    df = sp.lambdify(var, df_expr, modules=["numpy"])
+    iteration = 0
+    error = 0
+    table = []
+    cumple = 0
+
+    while cumple == 0 and iteration < 100:
+        print(x0, x0_anterior, iteration, error)
+        df_x0 = df(x0)
+        f_x0 = f(x0)
+        if abs(df_x0) == 0:
+            return None
+
+        if iteration == 0:
+            error = None
+            table.append([iteration, x0, f_x0, df_x0, error])
+        else:
+            error = abs(x0 - x0_anterior)
+            if error <= tolerance:
+                cumple = 1
+            else: 
+                cumple = 0
+            error_cientific = "{:.5e}".format(error)
+            table.append([iteration, x0, f_x0, df_x0, error_cientific])
+        x0_anterior = x0
+        x0 = x0 - (f_x0 / df_x0)
+        iteration +=1
+    
+    if cumple == 1:
+        return iteration, x0_anterior, error, table
+    return "run out of iterations"

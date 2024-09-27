@@ -21,6 +21,7 @@ def Calculator(request):
     }
     return HttpResponse(template.render(context, request))
 
+# Bisection method
 def fun_bisection(request):
     data = json.loads(request.body)
     a = data["a"]
@@ -64,3 +65,43 @@ def graph_function(request):
         return JsonResponse({'image': image})
     except Exception as e:
         return HttpResponse(f"Error showing the graph: {e}")
+    
+# Newton method
+def newton(request):
+    data = json.loads(request.body)
+    x0 = data["x0"]
+    tolerance = data["tolerance"]
+    function = data["function"]
+    variable = data["variable"]
+    image_base64 = graph(function, variable)
+    
+    try:
+        if newton_method(x0, tolerance, function, variable) is None:
+            context = {
+                "result": f"Dividing by 0",
+                "type": 1,
+                "buffer": image_base64
+            }
+            return JsonResponse(context)
+        elif newton_method(x0, tolerance, function, variable) == "run out if iterations":
+            context = {
+                "result": "Run out of iterations",
+                "type": 3,
+                "buffer": image_base64
+            }
+            return JsonResponse(context)
+        iterations, xi, error, table = newton_method(x0, tolerance, function, variable)
+        print(iterations, xi, error, table)
+    except Exception as e:  
+        return HttpResponse(f"Error in newton method: {e}")
+    context = {
+        'buffer': image_base64,
+        "result": {
+            "root_result" : xi,
+            "iter": iterations,
+            "error": error,
+            "table": table
+        },
+        "type": 2
+    }
+    return JsonResponse(context)
