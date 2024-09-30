@@ -1,0 +1,344 @@
+// Function that  verifies the root existence in a given invterval
+Start
+    Define function root_existence with parameters (a, b, fun)
+
+    f = simplified function of fun  // Call a function to simplify fun
+
+    fa = f(a)  // Calculate the value of the function at point a
+    fb = f(b)  // Calculate the value of the function at point b
+
+    If fa * fb < 0 then
+        Return True  // A root exists in the interval [a, b]
+    Else
+        Return False  // No root exists in the interval [a, b]
+    EndIf
+End
+
+// Incremental seach method
+Start
+    Define function search with parameters (f, x0, delta, N)
+
+    f = simplified function of f  // Call a function to simplify f
+
+    Print "Incremental search"
+    Print "Results"
+
+    For i from 0 to N-1 do
+        x1 = x0 + delta  // Calculate the new point x1
+
+        If f(x0) * f(x1) < 0 then
+            Print "There is a root of f in [x0, x1]"  // Root found in the interval
+        EndIf
+
+        x0 = x1  // Move to the next point
+    EndFor
+End
+
+// Function that converts an algebraic expression so that Python can interpret it
+Start
+    Define function symplified_function with parameter (fun)
+
+    expr = sympify(fun)  // Convert the string expression fun into a symbolic expression
+
+    variable = symbol "x"  // Define a symbolic variable x
+
+    function = lambdify(variable, expr, using numpy  // Create a numerical function from the symbolic expression, using numpy for calculations
+
+    Return function  // Return the numerical function
+End
+
+// Bisection method
+Start
+    Define function bisection with parameters (a, b, function, tolerance)
+
+    new_a = a  // Initialize new_a as a
+    new_b = b  // Initialize new_b as b
+    tolerance = tolerance  // Set the tolerance
+
+    If root_existence(new_a, new_b, function) is False then
+        Print "It does not change signs"
+        Exit function  // Stop execution if no root exists in the interval
+    EndIf
+
+    expr = sympify(function)  // Convert the function string to a symbolic expression
+    f = lambdify("x", expr, using numpy)  // Convert the symbolic expression to a numerical function
+
+    cumple = 0  // Set condition to check if tolerance has been met
+    iteration = 0  // Initialize the iteration counter
+    table = []  // Initialize a table to store the results
+    error = 0  // Initialize error as 0
+
+    While cumple == 0 and iteration < 100 do
+        c = new_a + ((new_b - new_a) / 2)  // Calculate midpoint c
+        fa = f(new_a)  // Calculate f(new_a)
+        fb = f(new_b)  // Calculate f(new_b)
+        fc = f(c)  // Calculate f(c)
+
+        If iteration == 0 then
+            error = None  // Set error to None for the first iteration
+            Add [iteration, new_a, c, new_b, fc, error] to table
+        Else
+            error = abs(c - c_previus)  // Calculate the absolute error
+            If error <= tolerance then
+                cumple = 1  // If error is less than or equal to tolerance, stop
+            Else
+                cumple = 0  // Continue if the error is greater than tolerance
+            EndIf
+            Add [iteration, new_a, c, new_b, fc, error] to table
+        EndIf
+
+        If fa * fc < 0 then
+            new_b = c  // Root is in [new_a, c]
+        ElseIf fc * fb < 0 then
+            new_a = c  // Root is in [c, new_b]
+        Else
+            Print "It does not change signs"  // No sign change detected
+            Exit loop
+        EndIf
+
+        iteration = iteration + 1  // Increment iteration counter
+        c_previus = c  // Store current midpoint as previous for next iteration
+    EndWhile
+
+    If cumple == 1 then
+        Print "Bisection \nResults table:"
+    Else
+        Print "No convergence within the maximum number of iterations"
+    EndIf
+
+    Print the table header for results
+    For each row in table do
+        Print the row with values formatted as a, c, b, fc, and error
+    EndFor
+End
+
+//Regla falsa method
+Start
+    Define function regla_falsa with parameters (function, a, b, tolerance, N)
+
+    f = simplified_function(function)  // Convert the function string to a numerical function
+
+    If root_existence(a, b, function) is False then
+        Print "It does not change signs"
+        Exit function  // Stop execution if no root exists in the interval
+    EndIf
+
+    error = None  // Initialize error as None
+    table = []  // Initialize table to store results
+    cumple = 0  // Initialize condition for meeting the tolerance
+    iteration = 1  // Initialize iteration count
+
+    c = (f(b) * a - f(a) * b) / (f(b) - f(a))  // Calculate first approximation of root c
+
+    If f(c) == 0 then
+        Print "Root: c"
+        Exit function  // If exact root found, exit the function
+    EndIf
+
+    Add [0, a, c, b, f(c), error] to table  // Record initial results
+
+    If f(a) * f(c) < 0 then
+        new_a = a
+        new_b = c  // Root lies between a and c
+    Else
+        new_a = c
+        new_b = b  // Root lies between c and b
+    EndIf
+
+    c_previous = c  // Store current approximation for future error calculation
+
+    While cumple == 0 and iteration < N do
+        c = ((f(new_b) * new_a) - (f(new_a) * new_b)) / (f(new_b) - f(new_a))  // Calculate new approximation c
+
+        error = abs(c - c_previous)  // Calculate absolute error
+
+        If error <= tolerance then
+            cumple = 1  // Stop if error is within tolerance
+        Else
+            cumple = 0  // Continue if error is greater than tolerance
+        EndIf
+
+        Add [iteration, new_a, c, new_b, f(c), error] to table  // Record current iteration's results
+
+        If f(new_a) * f(c) < 0 then
+            new_b = c  // Root is between new_a and c
+        Else
+            new_a = c  // Root is between c and new_b
+        EndIf
+
+        c_previous = c  // Update c_previous for next iteration
+        iteration = iteration + 1  // Increment iteration count
+    EndWhile
+
+    If cumple == 1 then
+        Print "Regla Falsa \nResults table:"
+    Else
+        Print "No convergence within the maximum number of iterations"
+    EndIf
+
+    Print the table header for results
+    For each row in table do
+        Print the row with values formatted as a, c, b, f(c), and error
+    EndFor
+End
+
+//Punto fijo method
+Start
+    Define function punto_fijo with parameters (function, g_function, x0, tolerance, N)
+
+    f = simplified_function(function)  // Convert the function string to a numerical function f
+    g = simplified_function(g_function)  // Convert the g_function string to a numerical function g
+
+    table = []  // Initialize table to store results
+    iteration = 1  // Initialize iteration count
+    error = None  // Initialize error as None
+
+    Add [0, x0, g(x0), f(x0), error] to table  // Record initial values
+
+    cumple = 0  // Initialize condition to check if tolerance is met
+    x0_anterior = x0  // Store initial value of x0
+    x0 = g(x0)  // Update x0 by applying g(x0)
+
+    While cumple == 0 and iteration < N do
+        error = abs(x0 - x0_anterior)  // Calculate absolute error
+
+        If error < tolerance then
+            cumple = 1  // Stop if error is within tolerance
+        Else
+            cumple = 0  // Continue if error is greater than tolerance
+        EndIf
+
+        Add [iteration, x0, g(x0), f(x0), error] to table  // Record iteration results
+
+        x0_anterior = x0  // Update x0_anterior for next iteration
+        x0 = g(x0)  // Apply g(x0) to get the new x0
+
+        iteration = iteration + 1  // Increment iteration count
+    EndWhile
+
+    If cumple == 1 then
+        Print "Punto Fijo \nResults table:"
+    Else
+        Print "No convergence within the maximum number of iterations"
+    EndIf
+
+    Print the table header for results
+    For each row in table do
+        Print the row with values formatted as x0, g(x0), f(x0), and error
+    EndFor
+End
+
+// Newton method
+Start
+    Define function newton with parameters (x0, tolerance, function, N)
+
+    x0 = convert x0 to float
+    tolerance = convert tolerance to float
+    x0_anterior = x0  // Store initial value of x0
+
+    expr = sympify(function)  // Convert the function string to a symbolic expression
+    f = symplified_function(function)  // Convert the function to a numerical function
+
+    df_expr = differentiate expr with respect to x  // Compute the derivative of the function
+    df = lambdify("x", df_expr)  // Convert the derivative to a numerical function
+
+    iteration = 0  // Initialize iteration count
+    error = 0  // Initialize error
+    table = []  // Initialize table to store results
+    cumple = 0  // Condition to check if tolerance is met
+
+    While cumple == 0 and iteration < N do
+        df_x0 = df(x0)  // Calculate the derivative at x0
+        f_x0 = f(x0)  // Calculate the function value at x0
+
+        If abs(df_x0) == 0 then
+            Return None  // Return None if the derivative is zero (division by zero)
+
+        If iteration == 0 then
+            error = None  // No error for the first iteration
+            Add [iteration, x0, f_x0, df_x0, error] to table
+        Else
+            error = abs(x0 - x0_anterior)  // Calculate absolute error
+
+            If error <= tolerance then
+                cumple = 1  // Stop if error is within tolerance
+            Else
+                cumple = 0  // Continue if error is greater than tolerance
+
+            Add [iteration, x0, f_x0, df_x0, error] to table
+        EndIf
+
+        x0_anterior = x0  // Store current x0 value for the next iteration
+        x0 = x0 - (f_x0 / df_x0)  // Update x0 using Newton's formula
+
+        iteration = iteration + 1  // Increment iteration count
+    EndWhile
+
+    If cumple == 1 then
+        Print "Newton \nResults table:"
+    Else
+        Print "No convergence within the maximum number of iterations"
+    EndIf
+
+    Print the table header for results
+    For each row in table do
+        Print the row with values formatted as x0, f(x0), df(x0), and error
+    EndFor
+End
+
+// Secant method
+Start
+    Define function secant with parameters (x0, x1, tolerance, N, function)
+
+    f = symplified_function(function)  // Convert the function string to a numerical function
+
+    iteration = 2  // Initialize iteration count
+    cumple = 0  // Condition to check if tolerance is met
+    table = []  // Initialize table to store results
+    error = None  // Initialize error
+
+    Add [0, x0, f(x0), error] to table  // Record initial values for x0
+    Add [1, x1, f(x1), error] to table  // Record initial values for x1
+
+    x1 = x1 - ((f(x1) * (x1 - x0)) / (f(x1) - f(x0)))  // Calculate the first update for x1
+
+    While cumple == 0 and iteration < N do
+        denominador = f(x1) - f(x0)  // Calculate the denominator
+
+        If abs(denominador) == 0 then
+            Print "Error. Dividing by 0"  // Handle the division by zero error
+
+        error = abs(x1 - x0)  // Calculate absolute error
+
+        If error <= tolerance then
+            cumple = 1  // Stop if error is within tolerance
+        Else
+            cumple = 0  // Continue if error is greater than tolerance
+
+        Add [iteration, x1, f(x1), error] to table  // Record the iteration results
+
+        x2 = x1 - ((f(x1) * (x1 - x0)) / denominador)  // Update x2 using the secant formula
+        x0 = x1  // Update x0 for the next iteration
+        x1 = x2  // Update x1 for the next iteration
+        iteration = iteration + 1  // Increment iteration count
+    EndWhile
+
+    If cumple == 1 then
+        Print "Secant \nResults table:"
+    Else
+        Print "No convergence within the maximum number of iterations"
+    EndIf
+
+    Print the table header for results
+    For each row in table do
+        Print the row with values formatted as xi, f(xi), and error
+    EndFor
+End
+
+// Multiple roots method
+
+// Gaussian simple elimination method
+
+// partial pivot method
+
+// Total pivot method
