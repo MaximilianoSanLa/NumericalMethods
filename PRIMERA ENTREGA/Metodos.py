@@ -30,6 +30,18 @@ def symplified_function(fun):
     function = sp.lambdify(variable, expr, modules=["numpy"])
     return function
 
+# functon for backward sustitution
+def sustReg(M):
+    n = M.shape[0]
+    x = np.zeros(n)
+
+    x[n-1] = M[n-1, n] / M[n-1, n-1]
+    for i in range(n-2, -1, -1):
+        aux = np.concatenate(([1], x[i+1:n]))
+        aux1 = np.concatenate(([M[i, n]], -M[i, i+1:n]))
+        x[i] = np.dot(aux, aux1) / M[i, i]
+    return x
+
 # Bisection method 
 def bisection(a, b, function, tolerance):
     new_a = a
@@ -282,6 +294,114 @@ def multiple_roots(function, d_function, dd_function, x0, tolerance, N):
             row[0], row[1], row[2], row[3]
         ))
 
+# Gaussian simple elimination method
+def gausspl(A, b):
+    n = A.shape[0]
+    M = np.hstack((A, b.reshape(-1, 1)))
+    print("Gaussian simple elimination\n")
+    print("Results:\n")
+    # if(M[0][0]==0):
+    #     return "Matriz en 0"
+    print(f"Stage {0}\n")
+    for row in M:
+        print(" ".join("{: .6f}".format(element) for element in row))
+    print("\n")
+    for i in range(n-1):
+        print(f"Stage {i+1}\n")
+        for j in range(i+1, n):
+            if M[j, i] != 0:
+                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
+        for row in M:
+            print(" ".join("{: .6f}".format(element) for element in row))
+        print("\n")
+    print("after applying backward sustitution\n")
+    print("x:\n")
+    x = sustReg(M)
+    for row in x:
+        print(row)
+    
+# Gaussian elimination with partial pivoting
+def gausspar(A, b):
+    n = A.shape[0]
+    M = np.hstack((A, b.reshape(-1, 1)))
+    print("Gaussian simple elimination\n")
+    print("Results:\n")
+    M = M.astype(np.float64)
+    print(f"Stage {0}\n")
+    for row in M:
+        print(" ".join("{: .6f}".format(element) for element in row))
+    print("\n")
+    for i in range(n-1):
+        print(f"Stage {i+1}\n")
+        abs_col = np.abs(M[i+1:n, i])
+        max_val = np.max(abs_col)
+        max_row = np.argmax(abs_col) + i + 1
+
+        if max_val > np.abs(M[i, i]):
+            M[[i, max_row], i:n+1] = M[[max_row, i], i:n+1]
+
+        for j in range(i+1, n):
+            if M[j, i] != 0:
+                M[j, i:n+1] -= (M[j, i] / M[i, i]) * M[i, i:n+1]
+        for row in M:
+            print(" ".join("{: .6f}".format(element) for element in row))
+        print("\n")
+        
+    print("after applying backward sustitution\n")
+    print("x:\n")
+    x = sustReg(M)
+    for row in x:
+        print(row)
+        
+# Gaussian elimination with total pivoting
+def gausstot(A, b):
+    # Initialization
+    n = A.shape[0]
+    M = np.hstack((A, b.reshape(-1, 1)))
+    cambi = []
+    M = M.astype(np.float64)
+    print("Gaussian simple elimination\n")
+    print("Results:\n")
+    print(f"Stage {0}\n")
+    for row in M:
+        print(" ".join("{: .6f}".format(element) for element in row))
+    print("\n")
+    for i in range(n-1):
+        print(f"Stage {i+1}\n")
+        submatrix = np.abs(M[i:n, i:n])
+        a, b = np.unravel_index(np.argmax(submatrix), submatrix.shape)
+        a += i
+        b += i
+
+        # Column swapping
+        if b != i:
+            cambi.append((i, b))
+            M[:, [i, b]] = M[:, [b, i]]
+
+        # Row swapping
+        if a != i:
+            M[[i, a], i:n+1] = M[[a, i], i:n+1]
+
+        # Gaussian elimination
+        for j in range(i+1, n):
+            if M[j, i] != 0:
+                M[j, i:n+1] -= (M[j, i] / M[i, i]) * M[i, i:n+1]
+        for row in M:
+            print(" ".join("{: .6f}".format(element) for element in row))
+        print("\n")
+
+    # Back substitution
+    x = sustReg(M)
+
+    # Reorder the solution vector based on column swaps
+    for i in range(len(cambi)-1, -1, -1):
+        x[cambi[i][0]], x[cambi[i][1]] = x[cambi[i][1]], x[cambi[i][0]]
+
+    print("after applying backward sustitution\n")
+    print("x:\n") 
+    for row in x:
+        print(row)
+
 search("ln((sin(x))^2+1)-1/2", -3, 0.5, 100)
 print("----------------------------------------------------------------------------------------------------------")
 bisection(0, 1, "ln((sin(x))^2+1)-1/2", 1e-7)
@@ -295,3 +415,12 @@ print("-------------------------------------------------------------------------
 secant(0.5, 1, 1e-7, 100, "ln((sin(x))^2+1)-1/2")
 print("----------------------------------------------------------------------------------------------------------")
 multiple_roots("exp(x)-x-1", "exp(x)-1", "exp(x)", 1, 1e-7, 100)
+print("----------------------------------------------------------------------------------------------------------")
+
+A=np.array([[2,-1,0,3],[1,0.5,3,8],[0,13,-2,11],[14,5,-2,3]])
+b=np.array([[1],[1],[1],[1]])
+gausspl(A, b)
+print("----------------------------------------------------------------------------------------------------------")
+gausspar(A, b)
+print("----------------------------------------------------------------------------------------------------------")
+gausstot(A, b)

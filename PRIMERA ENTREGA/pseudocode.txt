@@ -42,7 +42,7 @@ Start
 
     variable = symbol "x"  // Define a symbolic variable x
 
-    function = lambdify(variable, expr, using numpy  // Create a numerical function from the symbolic expression, using numpy for calculations
+    function = lambdify(variable, expr, using numpy)  // Create a numerical function from the symbolic expression, using numpy for calculations
 
     Return function  // Return the numerical function
 End
@@ -380,7 +380,127 @@ Start
 End
 
 // Gaussian simple elimination method
+Start
+    Define function gausspl with parameters (A, b)
+    
+    # Initialization
+    n = number of rows in matrix A
+    M = augment matrix A with column vector b  // Create augmented matrix [A | b]
+
+    Print "Gaussian simple elimination"
+    Print initial matrix (Stage 0)
+
+    # Gaussian elimination
+    For i from 0 to n-2 do
+        Print "Stage", i+1
+
+        For each row j from i+1 to n-1 do
+            If M[j, i] is not zero then
+                Perform row operation: 
+                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
+        EndFor
+
+        Print the current matrix M after each stage
+    EndFor
+
+    # Back substitution to solve the upper triangular system
+    Print "After applying backward substitution"
+    Print solution vector x obtained through sustReg
+
+End
 
 // partial pivot method
+Start
+    Define function gausspar with parameters (A, b)
+    
+    # Initialization
+    n = number of rows in matrix A
+    M = augment matrix A with column vector b  // Create augmented matrix [A | b]
+    Convert M to float64 type for numerical stability
+
+    Print "Gaussian simple elimination"
+    Print initial matrix (Stage 0)
+
+    # Gaussian elimination with partial pivoting
+    For i from 0 to n-2 do
+        Print "Stage", i+1
+
+        # Find the largest absolute value below the diagonal in column i
+        abs_col = absolute value of M[i+1:n, i]
+        max_val = maximum value in abs_col
+        max_row = index of max_val + i + 1
+
+        # Perform row swap if necessary
+        If max_val > absolute value of M[i, i] then
+            Swap row i and row max_row in matrix M
+
+        # Perform Gaussian elimination
+        For each row j from i+1 to n-1 do
+            If M[j, i] is not zero then
+                Perform row operation: 
+                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
+        EndFor
+
+        Print the current matrix M after each stage
+    EndFor
+
+    # Back substitution to solve the upper triangular system
+    Print "After applying backward substitution"
+    Print solution vector x obtained through sustReg
+
+End
+
 
 // Total pivot method
+Start
+    Define function gausstot with parameters (A, b)
+    
+    # Initialization
+    n = number of rows in matrix A
+    M = augment matrix A with column vector b  // Create augmented matrix [A | b]
+    cambi = []  // Initialize list to store column swaps
+    Convert M to float64 type for numerical stability
+
+    Print "Gaussian simple elimination"
+    Print initial matrix (Stage 0)
+
+    # Gaussian elimination process
+    For i from 0 to n-2 do
+        Print "Stage", i+1
+        
+        # Find the largest element in the submatrix M[i:n, i:n]
+        submatrix = absolute value of M[i:n, i:n]
+        a, b = indices of the maximum element in submatrix
+        Adjust indices a and b based on the submatrix position
+
+        # Column swapping
+        If b is not equal to i then
+            Append (i, b) to cambi  // Store column swap information
+            Swap column i and column b in matrix M
+
+        # Row swapping
+        If a is not equal to i then
+            Swap row i and row a in matrix M starting from column i
+
+        # Perform Gaussian elimination
+        For each row j from i+1 to n-1 do
+            If M[j, i] is not zero then
+                Perform row operation: 
+                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
+        EndFor
+
+        Print the current matrix M after each stage
+    EndFor
+
+    # Back substitution to solve the upper triangular system
+    x = perform back substitution on matrix M
+
+    # Reorder the solution vector based on recorded column swaps
+    For each swap (i, j) in cambi (from last to first) do
+        Swap x[i] and x[j]
+    EndFor
+
+    Print "After applying backward substitution"
+    Print solution vector x
+
+End
