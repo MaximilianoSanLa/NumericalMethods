@@ -243,6 +243,44 @@ def secant(x0, x1, tolerance, N, function):
             row[0], row[1], row[2], row[3] if row[3] is not None else "0"
         ))
     
+# Multiple roots method
+def multiple_roots(function, d_function, dd_function, x0, tolerance, N):
+    xi = x0
+    history = []
+    cumple = 0
+    h = symplified_function(function)
+    dh = symplified_function(d_function)
+    ddh = symplified_function(dd_function)
+
+    for i in range(N):
+        
+        hi = h(xi)
+        
+        dhi = dh(xi)
+        
+        ddhi = ddh(xi)
+        
+        # function for multiple roots
+        xi_new = xi - ((hi * dhi) / (dhi**2 - hi * ddhi))
+        
+        error = abs(xi_new - xi)
+        history.append((i, xi, "{:.5e}".format(hi), "{:.5e}".format(error)))
+        
+        if error < tolerance:
+            cumple = 1
+            break
+        
+        xi = xi_new
+        
+    if cumple == 1:
+        print(f"Multiple roots \nResults table:\n")
+    else:
+        print( "No convergence within the maximum number of iterations")
+    print("| {:^4} | {:^15} | {:^18} | {:^18} |".format("i", "xi", "h(xi)", "Error absoluto"))
+    for row in history:
+        print("| {:<4} | {:<15.10f} | {:<18} | {:<18} |".format(
+            row[0], row[1], row[2], row[3]
+        ))
 
 search("ln((sin(x))^2+1)-1/2", -3, 0.5, 100)
 print("----------------------------------------------------------------------------------------------------------")
@@ -250,8 +288,10 @@ bisection(0, 1, "ln((sin(x))^2+1)-1/2", 1e-7)
 print("----------------------------------------------------------------------------------------------------------")
 regla_falsa("ln((sin(x))^2+1)-1/2", 0, 1, 1e-7, 100)
 print("----------------------------------------------------------------------------------------------------------")
+punto_fijo("ln((sin(x))^2+1)-(1/2)-x", "ln((sin(x))^2+1)-1/2", -0.5, 1e-7, 100)
+print("----------------------------------------------------------------------------------------------------------")
 newton(0.5, 1e-7, "ln((sin(x))^2+1)-1/2", 100)
 print("----------------------------------------------------------------------------------------------------------")
 secant(0.5, 1, 1e-7, 100, "ln((sin(x))^2+1)-1/2")
 print("----------------------------------------------------------------------------------------------------------")
-punto_fijo("ln((sin(x))^2+1)-(1/2)-x", "ln((sin(x))^2+1)-1/2", -0.5, 1e-7, 100)
+multiple_roots("exp(x)-x-1", "exp(x)-1", "exp(x)", 1, 1e-7, 100)

@@ -336,6 +336,48 @@ Start
 End
 
 // Multiple roots method
+Start
+    Define function multiple_roots with parameters (function, d_function, dd_function, x0, tolerance, N)
+
+    xi = x0  // Initialize xi with the initial guess
+    history = []  // Initialize list to store results
+    cumple = 0  // Condition to check if tolerance is met
+
+    h = symplified_function(function)  // Convert the function to a numerical function
+    dh = symplified_function(d_function)  // Convert the derivative of the function to numerical function
+    ddh = symplified_function(dd_function)  // Convert the second derivative of the function to numerical function
+
+    For i from 0 to N-1 do
+        hi = h(xi)  // Evaluate h(xi)
+        dhi = dh(xi)  // Evaluate h'(xi)
+        ddhi = ddh(xi)  // Evaluate h''(xi)
+
+        // Update xi using the formula for multiple roots
+        xi_new = xi - ((hi * dhi) / (dhi^2 - hi * ddhi))
+        
+        error = abs(xi_new - xi)  // Calculate the error
+
+        Add (i, xi, hi, error) to history  // Store iteration, xi, hi, and error in the history list
+
+        If error < tolerance then
+            cumple = 1  // Stop if error is within tolerance
+            Break the loop  // Exit the loop
+        EndIf
+
+        xi = xi_new  // Update xi for the next iteration
+    EndFor
+
+    If cumple == 1 then
+        Print "Multiple roots \nResults table:\n"
+    Else
+        Print "No convergence within the maximum number of iterations"
+    EndIf
+
+    Print the table header for results
+    For each row in history do
+        Print the row with values formatted as i, xi, h(xi), and error
+    EndFor
+End
 
 // Gaussian simple elimination method
 
