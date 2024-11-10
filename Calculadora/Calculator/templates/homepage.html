@@ -24,7 +24,7 @@
             <ul class="navbar-nav ml-auto">
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Methods
+                  Root methods
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                     <button id="show_incremental_search_method_form" class = "btn">Incremental_search</button>
@@ -40,11 +40,26 @@
                     <button id="show_secant_method_form" class = "btn">Secant</button>
                     <div class="dropdown-divider"></div>
                     <button id="show_multiple_roots_method_form" class = "btn">Multiple roots</button>
-                    
                 </div>                
               </li>
             </ul>
-          </div>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Direct methods
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <button id="show_gaussian_simple_elimination_method_form" class = "btn">Gaussian simple elimination</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_GE_partial_pivoting_method_form" class = "btn">GS elimination with partial pivoting</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_GE_total_pivoting_method_form" class = "btn">GS elimination with total pivoting</button>
+                </div>                
+              </li>
+            </ul>
+        </div>
       </nav>
     <div class="container">
 
@@ -132,6 +147,32 @@
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
 
+        {% comment %} Show punto fijo method form {% endcomment %}
+        <form id="punto_fijo_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="f_punto_fijo_method">Enter a mathematical function f:</label>
+                <input type="text" id="f_punto_fijo_method" name="f_punto_fijo_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <div class="form-group">
+                <label for="g_punto_fijo_method">Enter a mathematical function g for f:</label>
+                <input type="text" id="g_punto_fijo_method" name="g_punto_fijo_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <div>
+                <label for="x0_punto_fijo_method">Enter an initial value</label>
+                <input type="text" id="x0_punto_fijo_method" name="x0_punto_fijo_method" placeholder="initial x0" required>
+            </div>
+            <div class = "form-group">
+                <label for="tolerance_punto_fijo_method">Enter tolerance:</label>
+                <input type="text" id="tolerance_punto_fijo_method" name="tolerance_punto_fijo_method" placeholder="Enter tolerance" required>
+            </div>
+            <div class = "form-group">
+                <label for="N_punto_fijo_method">Enter a number for max iterations: (the default is 100)</label>
+                <input type="text" id="N_punto_fijo_method" name="N_punto_fijo_method" placeholder="100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
         {% comment %} Show Newton method form {% endcomment %}
         <form id="newton_method_form" style="display: none;">
             {% csrf_token %}
@@ -146,6 +187,96 @@
             <div class="form-group">
                 <label for="tolerance_newton_method">Enter tolerance: </label>
                 <input type="text" id="tolerance_newton_method" name="tolerance_newton_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
+        {% comment %} Show secant method form {% endcomment %}
+        <form id="secant_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="function_secant_method">Enter a mathematical function:</label>
+                <input type="text" id="function_secant_method" name="function_secant_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <div class="form-group">
+                <label for="x0_secant_method">Enter the first initial value:</label>
+                <input type="text" id="x0_secant_method" name="x0_secant_method" placeholder="Enter x0" required>
+            </div>
+            <div class="form-group">
+                <label for="x1_secant_method">Enter the second initial value:</label>
+                <input type="text" id="x1_secant_method" name="x1_secant_method" placeholder="Enter x1" required>
+            </div>
+            <div>
+                <label for="tolerance_secant_method">Enter tolerance:</label>
+                <input type="text" id="tolerance_secant_method" name="tolerance_secant_method" placeholder="Enter tolerance" required>
+            </div>
+            <div class = "form-group">
+                <label for="N_secant_method">Enter a number for max iterations: (the default is 100)</label>
+                <input type="text" id="N_secant_method" name="N_secant_method" placeholder="100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
+        {% comment %} Show multiple roots method form {% endcomment %}
+        <form id="multiple_roots_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="function_mulitple_roots_method">Enter a mathematical function:</label>
+                <input type="text" id="function_mulitple_roots_method" name="function_mulitple_roots_method" placeholder="e.g. 2*x**2 + 3*x + 1" required>
+            </div>
+            <div class="form-group">
+                <label for="x0_multiple_roots_method">Enter an initial value:</label>
+                <input type="text" id="x0_multiple_roots_method" name="x0_multiple_roots_method" placeholder="Enter x0" required>
+            </div>
+            <div>
+                <label for="tolerance_multiple_roots_method">Enter tolerance:</label>
+                <input type="text" id="tolerance_multiple_roots_method" name="tolerance_multiple_roots_method" placeholder="Enter tolerance" required>
+            </div>
+            <div class = "form-group">
+                <label for="N_multiple_roots_method">Enter a number for max iterations: (the default is 100)</label>
+                <input type="text" id="N_multiple_roots_method" name="N_multiple_roots_method" placeholder="100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
+        {% comment %} Show gaussian simple elimination method form {% endcomment %}
+        <form id="gaussian_simple_elimination_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="A_gaussian_simple_elimination_method">Enter matrix nxn :</label>
+                <input type="text" id="A_gaussian_simple_elimination_method" name="A_gaussian_simple_elimination_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_gaussian_simple_elimination_method">Enter vector b:</label>
+                <input type="text" id="b_gaussian_simple_elimination_method" name="b_gaussian_simple_elimination_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
+        {% comment %} Show gaussian elimination with partial pivoting method form {% endcomment %}
+        <form id="GE_partial_pivoting_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="A_GE_partial_pivoting_method">Enter matrix nxn :</label>
+                <input type="text" id="A_GE_partial_pivoting_method" name="A_GE_partial_pivoting_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_GE_partial_pivoting_method">Enter vector b:</label>
+                <input type="text" id="b_GE_partial_pivoting_method" name="b_GE_partial_pivoting_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Graph</button>
+        </form>
+
+        {% comment %} Show gaussian elimination with total pivoting method form {% endcomment %}
+        <form id="GE_total_pivoting_method_form" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="A_GE_total_pivoting_method">Enter matrix nxn :</label>
+                <input type="text" id="A_GE_total_pivoting_method" name="A_GE_total_pivoting_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_GE_total_pivoting_method">Enter vector b:</label>
+                <input type="text" id="b_GE_total_pivoting_method" name="b_GE_total_pivoting_method" placeholder="e.g. [2,3,4]" required>
             </div>
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>

@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from django.template import loader
 from .models import metodo
 from .metodos import *
-import math
 import io
 import matplotlib.pyplot as plt
 import matplotlib
@@ -27,6 +26,18 @@ def symplified_function(fun):
     function = sp.lambdify(variable, expr, modules=["numpy"])
     return function
 
+# functon for backward sustitution
+def sustReg(M):
+    n = M.shape[0]
+    x = np.zeros(n)
+
+    x[n-1] = M[n-1, n] / M[n-1, n-1]
+    for i in range(n-2, -1, -1):
+        aux = np.concatenate(([1], x[i+1:n]))
+        aux1 = np.concatenate(([M[i, n]], -M[i, i+1:n]))
+        x[i] = np.dot(aux, aux1) / M[i, i]
+    return x
+
 # Function to verify the root existence in a given interval
 def root_existence(a, b, fun):
     f = symplified_function(fun)
@@ -40,6 +51,8 @@ def root_existence(a, b, fun):
 
 # Function to graph a algebraic function
 def graph(function):
+    if not validate_function(function):
+        return "invalid function"
     f = symplified_function(function)
     
     x_vals = np.linspace(-10, 10, 400)
@@ -74,6 +87,8 @@ def graph(function):
 
 # Incremental search function
 def incremental_search(f, x0, delta, N):
+    if not validate_function(f):
+        return "invalid function"
     f = symplified_function(f)
     table = []
     for i in range(N):
@@ -127,7 +142,7 @@ def bisection(a, b, function, tolerance, N):
         scientific_notation = "{:.5e}".format(error)
         return c, iteration, scientific_notation, table
     else:
-        return "no convergence", table
+        return "ran out of iterations ", table
     
 # Regla Falsa 
 def regla_falsa(function, a, b, tolerance, N):
@@ -173,12 +188,43 @@ def regla_falsa(function, a, b, tolerance, N):
         scientific_notation = "{:.5e}".format(error)
         return c, iteration, scientific_notation, table
     else:
-        return "no convergence", table
+        return "ran out of iterations", table
 
+#  Punto fijo method
+def punto_fijo(function, g_function, x0, tolerance, N):
+    if not validate_function(function):
+        return "invalid function"
+    elif not validate_function(g_function):
+        return "invalid function"
+    f = symplified_function(function)
+    g = symplified_function(g_function)
+    table = [] 
+    iteration = 1
+    error = 0
+    table.append([0, x0, "{:.5e}".format(g(x0)), "{:.5e}".format(f(x0)), error])
+    cumple = 0
+    x0_anterior = x0
+    x0 = g(x0)
+    
+    while cumple == 0 and iteration < N:
+        error = abs(x0-x0_anterior)
+        if error < tolerance:
+            cumple = 1
+        else:
+            cumple = 0
+        table.append([iteration, x0, "{:.5e}".format(g(x0)), "{:.5e}".format(f(x0)), "{:.5e}".format(error)])
+        x0_anterior = x0
+        x0 = g(x0)
+        iteration += 1
+    if cumple == 1:
+        return iteration, x0, g(x0), f(x0), error, table
+    else:
+        return "ran out of iterations", table
+    
 # Newton method
-def newton_method(x0,tolerance, function):
-    x0 = float(x0)
-    tolerance = float(tolerance)
+def newton_method(x0,tolerance, function, N):
+    if not validate_function(function):
+        return "invalid function"
     x0_anterior = x0
     var =sp.symbols("x")
     expr = sp.sympify(function)  
@@ -190,7 +236,7 @@ def newton_method(x0,tolerance, function):
     table = []
     cumple = 0
 
-    while cumple == 0 and iteration < 100:
+    while cumple == 0 and iteration < N:
         print(x0, x0_anterior, iteration, error)
         df_x0 = df(x0)
         f_x0 = f(x0)
@@ -198,7 +244,7 @@ def newton_method(x0,tolerance, function):
             return None
 
         if iteration == 0:
-            error = None
+            error = 0
             table.append([iteration, x0, f_x0, df_x0, error])
         else:
             error = abs(x0 - x0_anterior)
@@ -214,4 +260,134 @@ def newton_method(x0,tolerance, function):
     
     if cumple == 1:
         return iteration, x0_anterior, error, table
-    return "run out of iterations"
+    return "ran out of iterations", table
+
+# Secant method
+def secant(x0, x1, tolerance, N, function):
+    if not validate_function(function):
+        return "invalid function"
+    f = symplified_function(function)
+    iteration = 2
+    cumple = 0
+    table = []
+    error = 0
+    table.append([0, x0, "{:.5e}".format(f(x0)), error])
+    table.append([1, x1, "{:.5e}".format(f(x1)), error])
+    x1 = x1-((f(x1)*(x1-x0))/(f(x1)-f(x0)))
+
+    while cumple == 0 and iteration < N:
+        denominador = f(x1) - f(x0)
+        if abs(denominador) == 0:
+            return "dividing by 0"
+
+        error = abs(x1 - x0)
+        if error <= tolerance:
+            cumple = 1
+        else: 
+            cumple = 0
+        error = abs(x1 - x0)
+        table.append([iteration, x1, "{:.5e}".format(f(x1)), "{:.5e}".format(error)])
+        x2 = x1-((f(x1)*(x1-x0))/denominador)
+        x0 = x1
+        x1 = x2
+        iteration += 1
+    if cumple == 1:
+        return iteration, x1, f(x1), error, table
+    else:
+        return "ran out of iterations", table
+
+# Multiple roots method
+def multiple_roots(function, x0, tolerance, N):
+    if not validate_function(function):
+        return "invalid function"
+    xi = x0
+    history = []
+    cumple = 0
+    expr = sp.sympify(function)
+    h = symplified_function(function)
+    dh_expr = sp.diff(expr, "x") 
+    dh = symplified_function(dh_expr)
+    ddh_expr = sp.diff(dh_expr, "x") 
+    ddh = symplified_function(ddh_expr)
+
+    for i in range(N):
+        hi = h(xi)
+        dhi = dh(xi)
+        ddhi = ddh(xi)
+        
+        # function for multiple roots
+        xi_new = xi - ((hi * dhi) / (dhi**2 - hi * ddhi))
+        
+        error = abs(xi_new - xi)
+        history.append((i, xi, "{:.5e}".format(hi), "{:.5e}".format(error)))
+        if error < tolerance:
+            cumple = 1
+            break
+        xi = xi_new
+    if cumple == 1:
+        return i, xi, hi, error, history
+    return "ran out of iterations", history
+
+# Gaussian simple elimination method
+def gausspl(A, b):
+    A = np.array(A)  
+    b = np.array(b)
+    n = A.shape[0]
+    M = np.hstack((A, b.reshape(-1, 1)))
+    # if(M[0][0]==0):
+    #     return "Matriz en 0"
+    for i in range(n-1):
+        for j in range(i+1, n):
+            if M[j, i] != 0:
+                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
+    return sustReg(M)
+
+# Gaussian elimination with partial pivoting
+def gausspar(A, b):
+    A = np.array(A)  
+    b = np.array(b)
+    n = A.shape[0]
+    M = np.hstack((A, b.reshape(-1, 1)))
+    M = M.astype(np.float64)
+    for i in range(n-1):
+        abs_col = np.abs(M[i+1:n, i])
+        max_val = np.max(abs_col)
+        max_row = np.argmax(abs_col) + i + 1
+
+        if max_val > np.abs(M[i, i]):
+            M[[i, max_row], i:n+1] = M[[max_row, i], i:n+1]
+
+        for j in range(i+1, n):
+            if M[j, i] != 0:
+                M[j, i:n+1] -= (M[j, i] / M[i, i]) * M[i, i:n+1]
+    return sustReg(M)
+
+# Gaussian elimination with total pivoting
+def gausstot(A, b):
+    A = np.array(A)  
+    b = np.array(b)
+    # Initialization
+    n = A.shape[0]
+    M = np.hstack((A, b.reshape(-1, 1)))
+    cambi = []
+    M = M.astype(np.float64)
+    for i in range(n-1):
+        submatrix = np.abs(M[i:n, i:n])
+        a, b = np.unravel_index(np.argmax(submatrix), submatrix.shape)
+        a += i
+        b += i
+
+        # Column swapping
+        if b != i:
+            cambi.append((i, b))
+            M[:, [i, b]] = M[:, [b, i]]
+
+        # Row swapping
+        if a != i:
+            M[[i, a], i:n+1] = M[[a, i], i:n+1]
+
+        # Gaussian elimination
+        for j in range(i+1, n):
+            if M[j, i] != 0:
+                M[j, i:n+1] -= (M[j, i] / M[i, i]) * M[i, i:n+1]
+    return sustReg(M)
