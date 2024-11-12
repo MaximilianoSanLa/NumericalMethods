@@ -198,6 +198,166 @@ def SOR(A, b, x0, w, tol, Nmax):
     for row in table:
         xant_str = " ".join(f"{val:8.6f}" for val in row[2])  # Convertir el vector a string
         print("| {:<4} | {:<18} | {:<10} |".format(row[0], row[1], xant_str))
+def difdivididas(X, Y):
+    n = len(X)
+    D = np.zeros((n, n))  
+
+   
+    D[:, 0] = Y
+
+    for i in range(1, n):
+        aux0 = D[i-1:n, i-1]  
+        aux = np.diff(aux0) 
+        aux2 = X[i:n] - X[0:n-i+1] 
+        D[i:n, i] = aux / aux2 
+
+    Coef = np.diag(D)
+    
+    print("Tabla de diferencias divididas:")
+    for row in D:
+        print(" ".join(f"{x:.6f}" for x in row))
+    
+
+    print("\nCoeficientes del polinomio de Newton:")
+    print(" ".join(f"{coef:.6f}" for coef in Coef))
+    
+
+    print("\nPolinomio de Newton:")
+    polynomial = f"{Coef[0]:.6f}"
+    for i in range(1, len(Coef)):
+        term = f"({Coef[i]:.6f})(x+{X[i-1]:.6f})"
+        polynomial += term
+    print(polynomial)
+    
+    return Coef
+
+def lagrange(X, Y):
+    n = len(X)
+    L = np.zeros((n, n))  
+
+    for i in range(n):   
+        aux0 = np.setdiff1d(X, X[i]) 
+        aux = [1 - aux0[0]] 
+        for j in range(1, len(aux0)):
+            aux = np.convolve(aux, [1, -aux0[j]])
+        L[i, :] = aux / np.polyval(aux, X[i]) 
+    
+   
+    print("Polinomios interpolantes de Lagrange:")
+    for i in range(n):
+        poly_str = " + ".join([f"{L[i][j]:.6f}x^{n-j-1}" for j in range(n)])
+        print(f" L{i}: {poly_str}")
+    
+    
+    print("\nPolinomio:")
+    polynomial = " + ".join([f"{Y[i]:.6f}*L{i}" for i in range(n)])
+    print(polynomial)
+    
+    return L
+
+def trazlin(X, Y):
+    n = len(X)
+    m = 2 * (n - 1)
+    A = np.zeros((m, m))  
+    b = np.zeros(m)      
+    Coef = np.zeros((n - 1, 2))  
+
+    
+    for i in range(n - 1):
+        A[i, 2 * i:2 * i + 2] = [X[i + 1], 1]
+        b[i] = Y[i + 1]
+    
+    A[0, 0:2] = [X[0], 1]
+    b[0] = Y[0]
+
+  
+    for i in range(1, n - 1):
+        A[n - 1 + i, 2 * i - 2:2 * i + 2] = [X[i], 1, -X[i], -1]
+        b[n - 1 + i] = 0
+
+    
+    Saux = np.linalg.solve(A, b)
+
+   
+    print("Coeficientes de los trazadores:")
+    for i in range(n - 1):
+        print(f" {Saux[2 * i]:.6f}  {Saux[2 * i + 1]:.6f}")
+    
+    
+    print("\nTrazadores:")
+    for i in range(n - 1):
+        print(f"{Saux[2 * i]:.6f}x + {Saux[2 * i + 1]:.6f}")
+    
+    return Coef
+
+
+def trazcuad(X, Y):
+    n = len(X)
+    m = 3 * (n - 1)
+    A = np.zeros((m, m))  
+    b = np.zeros(m)      
+    Coef = np.zeros((n - 1, 3))  
+
+   
+    for i in range(n - 1):
+        A[i, 3 * i:3 * i + 3] = [X[i + 1] ** 2, X[i + 1], 1]
+        b[i] = Y[i + 1]
+    
+    A[0, 0:3] = [X[0] ** 2, X[0], 1]
+    b[0] = Y[0]
+
+    
+    for i in range(1, n - 1):
+        A[n - 1 + i, 3 * i - 3:3 * i + 3] = [X[i] ** 2, X[i], 1, -X[i] ** 2, -X[i], -1]
+        b[n - 1 + i] = 0
+
+    Saux = np.linalg.solve(A, b)
+
+    
+    print("Coeficientes de los trazadores:")
+    for i in range(n - 1):
+        print(f"{Saux[3 * i]:.6f} {Saux[3 * i + 1]:.6f} {Saux[3 * i + 2]:.6f}")
+    
+    
+    print("\nTrazadores:")
+    for i in range(n - 1):
+        print(f"{Saux[3 * i]:.6f}x^2 + {Saux[3 * i + 1]:.6f}x + {Saux[3 * i + 2]:.6f}")
+    
+    return Coef
+
+def trazcub(X, Y):
+    n = len(X)
+    m = 4 * (n - 1)
+    A = np.zeros((m, m)) 
+    b = np.zeros(m)       
+    Coef = np.zeros((n - 1, 4))  
+
+
+    for i in range(n - 1):
+        A[i, 4 * i:4 * i + 4] = [X[i + 1] ** 3, X[i + 1] ** 2, X[i + 1], 1]
+        b[i] = Y[i + 1]
+    
+    A[0, 0:4] = [X[0] ** 3, X[0] ** 2, X[0], 1]
+    b[0] = Y[0]
+
+
+    for i in range(1, n - 1):
+        A[n - 1 + i, 4 * i - 4:4 * i + 4] = [X[i] ** 3, X[i] ** 2, X[i], 1, -X[i] ** 3, -X[i] ** 2, -X[i], -1]
+        b[n - 1 + i] = 0
+
+    Saux = np.linalg.solve(A, b)
+
+
+    print("Coeficientes de los trazadores:")
+    for i in range(n - 1):
+        print(f"{Saux[4 * i]:.6f} {Saux[4 * i + 1]:.6f} {Saux[4 * i + 2]:.6f} {Saux[4 * i + 3]:.6f}")
+    
+    print("\nTrazadores:")
+    for i in range(n - 1):
+        print(f"{Saux[4 * i]:.6f}x^3 + {Saux[4 * i + 1]:.6f}x^2 + {Saux[4 * i + 2]:.6f}x + {Saux[4 * i + 3]:.6f}")
+    
+    return Coef
+
 
 A = [[4,-1,0,3], [1,15.5,3,8], [0,-1.3,-4,1.1], [14,5,-2,30]]
 b = [1, 1, 1, 1]
