@@ -139,9 +139,7 @@ def regla_falsa(function, a, b, tolerance, N):
         print("| {:<4} | {:<15.10f} | {:<15.10f} | {:<15.10f} | {:<18} | {:<18} |".format(
             row[0], row[1], row[2], row[3], row[4], row[5] if row[5] is not None else "0"
         ))
-        
-        
-        
+               
 #  Punto fijo method
 def punto_fijo(function, g_function, x0, tolerance, N):
     f = symplified_function(function)
