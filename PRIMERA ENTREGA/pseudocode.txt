@@ -1,506 +1,273 @@
-// Function that  verifies the root existence in a given invterval
-Start
-    Define function root_existence with parameters (a, b, fun)
-
-    f = simplified function of fun  // Call a function to simplify fun
-
-    fa = f(a)  // Calculate the value of the function at point a
-    fb = f(b)  // Calculate the value of the function at point b
-
-    If fa * fb < 0 then
-        Return True  // A root exists in the interval [a, b]
-    Else
-        Return False  // No root exists in the interval [a, b]
-    EndIf
-End
-
-// Incremental seach method
-Start
-    Define function search with parameters (f, x0, delta, N)
-
-    f = simplified function of f  // Call a function to simplify f
-
-    Print "Incremental search"
-    Print "Results"
-
-    For i from 0 to N-1 do
-        x1 = x0 + delta  // Calculate the new point x1
-
-        If f(x0) * f(x1) < 0 then
-            Print "There is a root of f in [x0, x1]"  // Root found in the interval
-        EndIf
-
-        x0 = x1  // Move to the next point
-    EndFor
-End
-
-// Function that converts an algebraic expression so that Python can interpret it
-Start
-    Define function symplified_function with parameter (fun)
-
-    expr = sympify(fun)  // Convert the string expression fun into a symbolic expression
-
-    variable = symbol "x"  // Define a symbolic variable x
-
-    function = lambdify(variable, expr, using numpy)  // Create a numerical function from the symbolic expression, using numpy for calculations
-
-    Return function  // Return the numerical function
-End
-
-// Bisection method
-Start
-    Define function bisection with parameters (a, b, function, tolerance)
-
-    new_a = a  // Initialize new_a as a
-    new_b = b  // Initialize new_b as b
-    tolerance = tolerance  // Set the tolerance
-
-    If root_existence(new_a, new_b, function) is False then
-        Print "It does not change signs"
-        Exit function  // Stop execution if no root exists in the interval
-    EndIf
-
-    expr = sympify(function)  // Convert the function string to a symbolic expression
-    f = lambdify("x", expr, using numpy)  // Convert the symbolic expression to a numerical function
-
-    cumple = 0  // Set condition to check if tolerance has been met
-    iteration = 0  // Initialize the iteration counter
-    table = []  // Initialize a table to store the results
-    error = 0  // Initialize error as 0
-
-    While cumple == 0 and iteration < 100 do
-        c = new_a + ((new_b - new_a) / 2)  // Calculate midpoint c
-        fa = f(new_a)  // Calculate f(new_a)
-        fb = f(new_b)  // Calculate f(new_b)
-        fc = f(c)  // Calculate f(c)
-
-        If iteration == 0 then
-            error = None  // Set error to None for the first iteration
-            Add [iteration, new_a, c, new_b, fc, error] to table
-        Else
-            error = abs(c - c_previus)  // Calculate the absolute error
-            If error <= tolerance then
-                cumple = 1  // If error is less than or equal to tolerance, stop
-            Else
-                cumple = 0  // Continue if the error is greater than tolerance
-            EndIf
-            Add [iteration, new_a, c, new_b, fc, error] to table
-        EndIf
-
-        If fa * fc < 0 then
-            new_b = c  // Root is in [new_a, c]
-        ElseIf fc * fb < 0 then
-            new_a = c  // Root is in [c, new_b]
-        Else
-            Print "It does not change signs"  // No sign change detected
-            Exit loop
-        EndIf
-
-        iteration = iteration + 1  // Increment iteration counter
-        c_previus = c  // Store current midpoint as previous for next iteration
-    EndWhile
-
-    If cumple == 1 then
-        Print "Bisection \nResults table:"
-    Else
-        Print "No convergence within the maximum number of iterations"
-    EndIf
-
-    Print the table header for results
-    For each row in table do
-        Print the row with values formatted as a, c, b, fc, and error
-    EndFor
-End
-
-//Regla falsa method
-Start
-    Define function regla_falsa with parameters (function, a, b, tolerance, N)
-
-    f = simplified_function(function)  // Convert the function string to a numerical function
-
-    If root_existence(a, b, function) is False then
-        Print "It does not change signs"
-        Exit function  // Stop execution if no root exists in the interval
-    EndIf
-
-    error = None  // Initialize error as None
-    table = []  // Initialize table to store results
-    cumple = 0  // Initialize condition for meeting the tolerance
-    iteration = 1  // Initialize iteration count
-
-    c = (f(b) * a - f(a) * b) / (f(b) - f(a))  // Calculate first approximation of root c
-
-    If f(c) == 0 then
-        Print "Root: c"
-        Exit function  // If exact root found, exit the function
-    EndIf
-
-    Add [0, a, c, b, f(c), error] to table  // Record initial results
-
-    If f(a) * f(c) < 0 then
-        new_a = a
-        new_b = c  // Root lies between a and c
-    Else
-        new_a = c
-        new_b = b  // Root lies between c and b
-    EndIf
-
-    c_previous = c  // Store current approximation for future error calculation
-
-    While cumple == 0 and iteration < N do
-        c = ((f(new_b) * new_a) - (f(new_a) * new_b)) / (f(new_b) - f(new_a))  // Calculate new approximation c
-
-        error = abs(c - c_previous)  // Calculate absolute error
-
-        If error <= tolerance then
-            cumple = 1  // Stop if error is within tolerance
-        Else
-            cumple = 0  // Continue if error is greater than tolerance
-        EndIf
-
-        Add [iteration, new_a, c, new_b, f(c), error] to table  // Record current iteration's results
-
-        If f(new_a) * f(c) < 0 then
-            new_b = c  // Root is between new_a and c
-        Else
-            new_a = c  // Root is between c and new_b
-        EndIf
-
-        c_previous = c  // Update c_previous for next iteration
-        iteration = iteration + 1  // Increment iteration count
-    EndWhile
-
-    If cumple == 1 then
-        Print "Regla Falsa \nResults table:"
-    Else
-        Print "No convergence within the maximum number of iterations"
-    EndIf
-
-    Print the table header for results
-    For each row in table do
-        Print the row with values formatted as a, c, b, f(c), and error
-    EndFor
-End
-
-//Punto fijo method
-Start
-    Define function punto_fijo with parameters (function, g_function, x0, tolerance, N)
-
-    f = simplified_function(function)  // Convert the function string to a numerical function f
-    g = simplified_function(g_function)  // Convert the g_function string to a numerical function g
-
-    table = []  // Initialize table to store results
-    iteration = 1  // Initialize iteration count
-    error = None  // Initialize error as None
-
-    Add [0, x0, g(x0), f(x0), error] to table  // Record initial values
-
-    cumple = 0  // Initialize condition to check if tolerance is met
-    x0_anterior = x0  // Store initial value of x0
-    x0 = g(x0)  // Update x0 by applying g(x0)
-
-    While cumple == 0 and iteration < N do
-        error = abs(x0 - x0_anterior)  // Calculate absolute error
-
-        If error < tolerance then
-            cumple = 1  // Stop if error is within tolerance
-        Else
-            cumple = 0  // Continue if error is greater than tolerance
-        EndIf
-
-        Add [iteration, x0, g(x0), f(x0), error] to table  // Record iteration results
-
-        x0_anterior = x0  // Update x0_anterior for next iteration
-        x0 = g(x0)  // Apply g(x0) to get the new x0
-
-        iteration = iteration + 1  // Increment iteration count
-    EndWhile
-
-    If cumple == 1 then
-        Print "Punto Fijo \nResults table:"
-    Else
-        Print "No convergence within the maximum number of iterations"
-    EndIf
-
-    Print the table header for results
-    For each row in table do
-        Print the row with values formatted as x0, g(x0), f(x0), and error
-    EndFor
-End
-
-// Newton method
-Start
-    Define function newton with parameters (x0, tolerance, function, N)
-
-    x0 = convert x0 to float
-    tolerance = convert tolerance to float
-    x0_anterior = x0  // Store initial value of x0
-
-    expr = sympify(function)  // Convert the function string to a symbolic expression
-    f = symplified_function(function)  // Convert the function to a numerical function
-
-    df_expr = differentiate expr with respect to x  // Compute the derivative of the function
-    df = lambdify("x", df_expr)  // Convert the derivative to a numerical function
-
-    iteration = 0  // Initialize iteration count
-    error = 0  // Initialize error
-    table = []  // Initialize table to store results
-    cumple = 0  // Condition to check if tolerance is met
-
-    While cumple == 0 and iteration < N do
-        df_x0 = df(x0)  // Calculate the derivative at x0
-        f_x0 = f(x0)  // Calculate the function value at x0
-
-        If abs(df_x0) == 0 then
-            Return None  // Return None if the derivative is zero (division by zero)
-
-        If iteration == 0 then
-            error = None  // No error for the first iteration
-            Add [iteration, x0, f_x0, df_x0, error] to table
-        Else
-            error = abs(x0 - x0_anterior)  // Calculate absolute error
-
-            If error <= tolerance then
-                cumple = 1  // Stop if error is within tolerance
-            Else
-                cumple = 0  // Continue if error is greater than tolerance
-
-            Add [iteration, x0, f_x0, df_x0, error] to table
-        EndIf
-
-        x0_anterior = x0  // Store current x0 value for the next iteration
-        x0 = x0 - (f_x0 / df_x0)  // Update x0 using Newton's formula
-
-        iteration = iteration + 1  // Increment iteration count
-    EndWhile
-
-    If cumple == 1 then
-        Print "Newton \nResults table:"
-    Else
-        Print "No convergence within the maximum number of iterations"
-    EndIf
-
-    Print the table header for results
-    For each row in table do
-        Print the row with values formatted as x0, f(x0), df(x0), and error
-    EndFor
-End
-
-// Secant method
-Start
-    Define function secant with parameters (x0, x1, tolerance, N, function)
-
-    f = symplified_function(function)  // Convert the function string to a numerical function
-
-    iteration = 2  // Initialize iteration count
-    cumple = 0  // Condition to check if tolerance is met
-    table = []  // Initialize table to store results
-    error = None  // Initialize error
-
-    Add [0, x0, f(x0), error] to table  // Record initial values for x0
-    Add [1, x1, f(x1), error] to table  // Record initial values for x1
-
-    x1 = x1 - ((f(x1) * (x1 - x0)) / (f(x1) - f(x0)))  // Calculate the first update for x1
-
-    While cumple == 0 and iteration < N do
-        denominador = f(x1) - f(x0)  // Calculate the denominator
-
-        If abs(denominador) == 0 then
-            Print "Error. Dividing by 0"  // Handle the division by zero error
-
-        error = abs(x1 - x0)  // Calculate absolute error
-
-        If error <= tolerance then
-            cumple = 1  // Stop if error is within tolerance
-        Else
-            cumple = 0  // Continue if error is greater than tolerance
-
-        Add [iteration, x1, f(x1), error] to table  // Record the iteration results
-
-        x2 = x1 - ((f(x1) * (x1 - x0)) / denominador)  // Update x2 using the secant formula
-        x0 = x1  // Update x0 for the next iteration
-        x1 = x2  // Update x1 for the next iteration
-        iteration = iteration + 1  // Increment iteration count
-    EndWhile
-
-    If cumple == 1 then
-        Print "Secant \nResults table:"
-    Else
-        Print "No convergence within the maximum number of iterations"
-    EndIf
-
-    Print the table header for results
-    For each row in table do
-        Print the row with values formatted as xi, f(xi), and error
-    EndFor
-End
-
-// Multiple roots method
-Start
-    Define function multiple_roots with parameters (function, d_function, dd_function, x0, tolerance, N)
-
-    xi = x0  // Initialize xi with the initial guess
-    history = []  // Initialize list to store results
-    cumple = 0  // Condition to check if tolerance is met
-
-    h = symplified_function(function)  // Convert the function to a numerical function
-    dh = symplified_function(d_function)  // Convert the derivative of the function to numerical function
-    ddh = symplified_function(dd_function)  // Convert the second derivative of the function to numerical function
-
-    For i from 0 to N-1 do
-        hi = h(xi)  // Evaluate h(xi)
-        dhi = dh(xi)  // Evaluate h'(xi)
-        ddhi = ddh(xi)  // Evaluate h''(xi)
-
-        // Update xi using the formula for multiple roots
-        xi_new = xi - ((hi * dhi) / (dhi^2 - hi * ddhi))
-        
-        error = abs(xi_new - xi)  // Calculate the error
-
-        Add (i, xi, hi, error) to history  // Store iteration, xi, hi, and error in the history list
-
-        If error < tolerance then
-            cumple = 1  // Stop if error is within tolerance
-            Break the loop  // Exit the loop
-        EndIf
-
-        xi = xi_new  // Update xi for the next iteration
-    EndFor
-
-    If cumple == 1 then
-        Print "Multiple roots \nResults table:\n"
-    Else
-        Print "No convergence within the maximum number of iterations"
-    EndIf
-
-    Print the table header for results
-    For each row in history do
-        Print the row with values formatted as i, xi, h(xi), and error
-    EndFor
-End
-
-// Gaussian simple elimination method
-Start
-    Define function gausspl with parameters (A, b)
-    
-    # Initialization
-    n = number of rows in matrix A
-    M = augment matrix A with column vector b  // Create augmented matrix [A | b]
-
-    Print "Gaussian simple elimination"
-    Print initial matrix (Stage 0)
-
-    # Gaussian elimination
-    For i from 0 to n-2 do
-        Print "Stage", i+1
-
-        For each row j from i+1 to n-1 do
-            If M[j, i] is not zero then
-                Perform row operation: 
-                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
-        EndFor
-
-        Print the current matrix M after each stage
-    EndFor
-
-    # Back substitution to solve the upper triangular system
-    Print "After applying backward substitution"
-    Print solution vector x obtained through sustReg
-
-End
-
-// partial pivot method
-Start
-    Define function gausspar with parameters (A, b)
-    
-    # Initialization
-    n = number of rows in matrix A
-    M = augment matrix A with column vector b  // Create augmented matrix [A | b]
-    Convert M to float64 type for numerical stability
-
-    Print "Gaussian simple elimination"
-    Print initial matrix (Stage 0)
-
-    # Gaussian elimination with partial pivoting
-    For i from 0 to n-2 do
-        Print "Stage", i+1
-
-        # Find the largest absolute value below the diagonal in column i
-        abs_col = absolute value of M[i+1:n, i]
-        max_val = maximum value in abs_col
-        max_row = index of max_val + i + 1
-
-        # Perform row swap if necessary
-        If max_val > absolute value of M[i, i] then
-            Swap row i and row max_row in matrix M
-
-        # Perform Gaussian elimination
-        For each row j from i+1 to n-1 do
-            If M[j, i] is not zero then
-                Perform row operation: 
-                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
-        EndFor
-
-        Print the current matrix M after each stage
-    EndFor
-
-    # Back substitution to solve the upper triangular system
-    Print "After applying backward substitution"
-    Print solution vector x obtained through sustReg
-
-End
-
-
-// Total pivot method
-Start
-    Define function gausstot with parameters (A, b)
-    
-    # Initialization
-    n = number of rows in matrix A
-    M = augment matrix A with column vector b  // Create augmented matrix [A | b]
-    cambi = []  // Initialize list to store column swaps
-    Convert M to float64 type for numerical stability
-
-    Print "Gaussian simple elimination"
-    Print initial matrix (Stage 0)
-
-    # Gaussian elimination process
-    For i from 0 to n-2 do
-        Print "Stage", i+1
-        
-        # Find the largest element in the submatrix M[i:n, i:n]
-        submatrix = absolute value of M[i:n, i:n]
-        a, b = indices of the maximum element in submatrix
-        Adjust indices a and b based on the submatrix position
-
-        # Column swapping
-        If b is not equal to i then
-            Append (i, b) to cambi  // Store column swap information
-            Swap column i and column b in matrix M
-
-        # Row swapping
-        If a is not equal to i then
-            Swap row i and row a in matrix M starting from column i
-
-        # Perform Gaussian elimination
-        For each row j from i+1 to n-1 do
-            If M[j, i] is not zero then
-                Perform row operation: 
-                M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
-        EndFor
-
-        Print the current matrix M after each stage
-    EndFor
-
-    # Back substitution to solve the upper triangular system
-    x = perform back substitution on matrix M
-
-    # Reorder the solution vector based on recorded column swaps
-    For each swap (i, j) in cambi (from last to first) do
-        Swap x[i] and x[j]
-    EndFor
-
-    Print "After applying backward substitution"
-    Print solution vector x
-
-End
+Root Existence (Root Existence Check)
+Define a and b as the boundaries of the interval.
+Define fun as the function to check.
+Simplify the function using a symbolic expression.
+Compute fa as the value of the function at a.
+Compute fb as the value of the function at b.
+If the product fa * fb is less than 0, there is a sign change, indicating the existence of a root. Return true.
+If not, there is no root in the interval. Return false.
+
+Incremental Search
+Define the function f and the initial value x0.
+Define a small step delta to increment the search.
+Define N as the number of steps for the search.
+Start a loop for i from 0 to N-1.
+Compute x1 as x0 + delta.
+If f(x0) * f(x1) is less than 0, it means there is a root between x0 and x1.
+Print this information.
+Update x0 to be x1.
+End the loop.
+
+Backward Substitution
+Define M as the augmented matrix of coefficients and constants.
+Determine n as the number of equations (rows in M).
+Initialize x as a zero array of length n.
+Set the last value of x[n-1] as M[n-1, n] / M[n-1, n-1].
+For each row i from n-2 down to 0:
+Create an auxiliary array aux consisting of 1 and the values of x[i+1:n].
+Create another auxiliary array aux1 consisting of the M[i, n] value followed by negative values of M[i, i+1:n].
+Update x[i] as the dot product of aux and aux1 divided by M[i, i].
+Return the array x.
+
+Bisection Method
+Set new_a and new_b as the starting values of the interval.
+If there is no sign change between f(new_a) and f(new_b), print that it does not change signs.
+Simplify the function expression and define f.
+Initialize cumple to 0 (convergence flag).
+Initialize iteration to 0.
+Initialize an empty list table to store iteration data.
+Initialize error to 0.
+Start a while loop:
+If cumple is 0 and iteration is less than 100, perform the following steps:
+Compute c as the midpoint of new_a and new_b.
+Compute fa, fb, and fc as the function values at new_a, new_b, and c respectively.
+If this is the first iteration, append the iteration data to table.
+Otherwise, compute the absolute error between c and c_previous. If the error is less than or equal to the tolerance, set cumple to 1.
+Append the iteration data to table.
+If fa * fc is less than 0, update new_b to c.
+If fc * fb is less than 0, update new_a to c.
+If the loop terminates and cumple is 1, print the results table.
+If there is no convergence within the maximum iterations, print "No convergence within the maximum number of iterations".
+End the loop.
+
+Regla Falsa (False Position Method)
+Define the function f, a, and b as the interval.
+If there is no sign change between f(a) and f(b), print that it does not change signs.
+Compute c as the false position estimate using the formula c = (f(b)*a - f(a)*b) / (f(b) - f(a)).
+If f(c) is 0, print the root c.
+Initialize cumple to 0 (convergence flag).
+Initialize iteration to 1.
+If f(a) * f(c) is less than 0, set new_a to a and new_b to c; otherwise, set new_a to c and new_b to b.
+Store the first iteration data in table.
+Start a while loop:
+If cumple is 0 and iteration is less than N, perform the following:
+Compute a new c using the formula c = (f(new_b)*new_a - f(new_a)*new_b) / (f(new_b) - f(new_a)).
+Compute the error as the absolute difference between c and c_previous.
+If the error is less than or equal to the tolerance, set cumple to 1.
+Append the iteration data to table.
+Update new_a and new_b based on the sign of f(a) * f(c).
+If the loop ends and cumple is 1, print the results table.
+If there is no convergence, print "No convergence within the maximum number of iterations".
+End the loop.
+
+Punto Fijo (Fixed Point Method)
+Define the functions f and g (the fixed-point iteration function).
+Define x0 as the initial guess.
+Initialize cumple to 0 (convergence flag).
+Initialize iteration to 1.
+Start a loop:
+If cumple is 0 and iteration is less than N, perform the following:
+Compute g(x0) and f(x0).
+Compute the error as the absolute difference between x0 and x0_anterior.
+If the error is less than the tolerance, set cumple to 1.
+Append the iteration data to table.
+Update x0_anterior to x0.
+Set x0 to g(x0).
+If the loop ends and cumple is 1, print the results table.
+If there is no convergence, print "No convergence within the maximum number of iterations".
+
+Newton Method
+Define x0 as the initial guess and tolerance as the acceptable error.
+Simplify the function f and compute its derivative df.
+Initialize cumple to 0 (convergence flag).
+Initialize iteration to 0.
+Start a while loop:
+If cumple is 0 and iteration is less than N, perform the following:
+Compute f(x0) and df(x0).
+If df(x0) is 0, print an error message and stop.
+Compute the new value x0 as x0 - (f(x0) / df(x0)).
+Compute the error as the absolute difference between the new and previous x0.
+If the error is less than or equal to the tolerance, set cumple to 1.
+Append the iteration data to table.
+If the loop ends and cumple is 1, print the results table.
+If there is no convergence, print "No convergence within the maximum number of iterations".
+End the loop.
+
+Secant Method
+Define x0 and x1 as the initial guesses and tolerance as the acceptable error.
+Simplify the function f.
+Initialize cumple to 0 (convergence flag).
+Initialize iteration to 2 (starting with two initial guesses).
+Start a while loop:
+If cumple is 0 and iteration is less than N, perform the following:
+Compute the new estimate x1 using the secant formula.
+Compute the error as the absolute difference between x1 and x0.
+If the error is less than or equal to the tolerance, set cumple to 1.
+Append the iteration data to table.
+Update x0 and x1 for the next iteration.
+If the loop ends and cumple is 1, print the results table.
+If there is no convergence, print "No convergence within the maximum number of iterations".
+End the loop.
+
+Multiple Roots Method (Multiple Root Finding)
+Initialize variables:
+Define xi as the initial guess.
+Define history as an empty list to store iteration history.
+Define cumple as a flag (0 for no convergence, 1 for convergence).
+Define h, dh, ddh as the simplified versions of the function, first derivative, and second derivative respectively.
+Start loop for N iterations:
+Compute values:
+Calculate hi as the value of the function at xi using h(xi).
+Calculate dhi as the value of the first derivative at xi using dh(xi).
+Calculate ddhi as the value of the second derivative at xi using ddh(xi).
+Apply formula for multiple roots:
+Calculate the new estimate xi_new using the formula:
+xi_new = xi - ( (hi * dhi) / (dhi^2 - hi * ddhi) )
+Compute error:
+Calculate the absolute error as error = |xi_new - xi|.
+Update history:
+Store the current iteration index, xi, hi, and error in history.
+Check for convergence:
+If the error is less than the tolerance, set cumple = 1 and break the loop.
+Update guess:
+Set xi = xi_new.
+Convergence Check:
+If cumple == 1, print "Multiple roots" and display the results table.
+If not, print "No convergence within the maximum number of iterations".
+
+Gaussian Simple Elimination Method
+Initialize variables:
+Define A as the coefficient matrix.
+Define b as the vector of constants.
+Define n as the number of equations (size of A).
+Define M as the augmented matrix formed by combining A and b.
+
+Forward Elimination:
+For each column i from 0 to n-1:
+For each row j from i+1 to n-1:
+If the element M[j, i] is not zero, eliminate it by updating row j using:
+M[j, i:n+1] = M[j, i:n+1] - (M[j, i] / M[i, i]) * M[i, i:n+1]
+Display the updated matrix after each step.
+Backward Substitution:
+Call the sustReg method to solve for the unknowns.
+Output the result:
+Print the solution vector x after applying backward substitution.
+
+Gaussian Elimination with Partial Pivoting
+Initialize variables:
+Define A as the coefficient matrix and b as the constant vector.
+Define n as the number of equations (size of A).
+Define M as the augmented matrix.
+Forward Elimination with Partial Pivoting:
+For each column i from 0 to n-1:
+Find the maximum absolute value in column i from row i+1 to n (partial pivoting).
+If necessary, swap rows to make the largest value the pivot element.
+For each row j from i+1 to n-1, eliminate the element M[j, i] using the formula:
+M[j, i:n+1] -= (M[j, i] / M[i, i]) * M[i, i:n+1]
+Display the updated matrix after each step.
+Backward Substitution:
+Call the sustReg method to solve for the unknowns.
+Output the result:
+Print the solution vector x after applying backward substitution.
+
+Gaussian Elimination with Total Pivoting
+Initialize variables:
+Define A as the coefficient matrix and b as the constant vector.
+Define n as the number of equations (size of A).
+Define M as the augmented matrix.
+Define cambi as a list to keep track of column swaps.
+Forward Elimination with Total Pivoting:
+For each column i from 0 to n-1:
+Find the largest value in the submatrix starting at M[i, i] using total pivoting.
+If necessary, swap both rows and columns to make the largest element the pivot.
+For each row j from i+1 to n-1, eliminate the element M[j, i] using the formula:
+M[j, i:n+1] -= (M[j, i] / M[i, i]) * M[i, i:n+1]
+Display the updated matrix after each step.
+Backward Substitution:
+Call the sustReg method to solve for the unknowns.
+Reorder the solution:
+Apply the column swaps from cambi to reorder the solution vector.
+Output the result:
+Print the solution vector x after applying backward substitution.
+
+pseudocode = """
+
+Linear Spline (trazlin):
+Convert X and Y lists to NumPy arrays.
+Define the length n of X (number of data points).
+Set the number of unknowns m = 2 * (n - 1) for linear splines.
+Initialize matrix A of size (m, m) and vector b of size m.
+Fill the interpolation conditions for each point.
+ For i = 0 to n-2:
+     A[i, 2*i:2*i+2] = [X[i+1], 1]
+     b[i] = Y[i+1]
+ Set A[n-1, 0:2] = [X[0], 1] and b[n-1] = Y[0].
+Fill the continuity conditions for each point where two splines meet.
+ For i = 1 to n-2:
+     A[n-1+i, 2*i-2:2*i+2] = [X[i], 1, -X[i], -1]
+     b[n-1+i] = 0.
+Solve the system A * S = b using linear algebra to find the coefficients.
+Return the coefficients as a list of tuples [(a, b), ...] for each linear segment.
+
+Quadratic Spline (trazcuad):
+Convert X and Y lists to NumPy arrays.
+Define the length n of X (number of data points).
+Set the number of unknowns m = 3 * (n - 1) for quadratic splines.
+Initialize matrix A of size (m, m) and vector b of size m.
+Fill the interpolation conditions for each point.
+ For i = 0 to n-2:
+     A[i, 3*i:3*i+3] = [X[i+1]^2, X[i+1], 1]
+     b[i] = Y[i+1]
+ Set A[n-1, 0:3] = [X[0]^2, X[0], 1] and b[n-1] = Y[0].
+Fill the continuity conditions to match first derivatives at segment boundaries.
+ For i = 1 to n-2:
+     A[n-1+i, 3*i-3:3*i+3] = [X[i]^2, X[i], 1, -X[i]^2, -X[i], -1]
+     b[n-1+i] = 0.
+Fill the smoothness conditions to match second derivatives at segment boundaries.
+ For i = 1 to n-2:
+     A[2*(n-1)-1+i, 3*i-3:3*i+3] = [2*X[i], 1, 0, -2*X[i], -1, 0]
+     b[2*(n-1)-1+i] = 0.
+Apply boundary conditions (second derivative is zero at endpoints).
+ Set A[-1, 0] = 2 and b[-1] = 0.
+Solve the system A * S = b to find the spline coefficients.
+ Return the coefficients as a list of tuples [(a, b, c), ...] for each quadratic segment.
+
+Cubic Spline (trazcub):
+Convert X and Y lists to NumPy arrays.
+Define the length n of X (number of data points).
+Set the number of unknowns m = 4 * (n - 1) for cubic splines.
+Initialize matrix A of size (m, m) and vector b of size m.
+Fill the interpolation conditions for each point.
+ For i = 0 to n-2:
+     A[row, 4*i:4*i+4] = [X[i]^3, X[i]^2, X[i], 1]
+     b[row] = Y[i]
+     row += 1
+     A[row, 4*i:4*i+4] = [X[i+1]^3, X[i+1]^2, X[i+1], 1]
+     b[row] = Y[i+1]
+     row += 1
+Fill the continuity conditions to match first derivatives at segment boundaries.
+ For i = 1 to n-2:
+     A[row, 4*(i-1):4*(i+1)] = [3*X[i]^2, 2*X[i], 1, 0, -3*X[i]^2, -2*X[i], -1, 0]
+     b[row] = 0
+     row += 1
+Fill the smoothness conditions to match second derivatives at segment boundaries.
+ For i = 1 to n-2:
+     A[row, 4*(i-1):4*(i+1)] = [6*X[i], 2, 0, 0, -6*X[i], -2, 0, 0]
+     b[row] = 0
+     row += 1
+Apply natural spline boundary conditions (second derivative is zero at endpoints).
+ Set A[row, 0:2] = [6*X[0], 2] and b[row] = 0.
+ Set A[row, -4:-2] = [6*X[-1], 2] and b[row] = 0.
+Solve the system A * S = b to find the cubic spline coefficients.
+ Return the coefficients as a list of tuples [(a, b, c, d), ...] for each cubic segment.
+"""
