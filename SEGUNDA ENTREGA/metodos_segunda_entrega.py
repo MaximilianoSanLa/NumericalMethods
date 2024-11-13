@@ -198,6 +198,248 @@ def SOR(A, b, x0, w, tol, Nmax):
     for row in table:
         xant_str = " ".join(f"{val:8.6f}" for val in row[2])  # Convertir el vector a string
         print("| {:<4} | {:<18} | {:<10} |".format(row[0], row[1], xant_str))
+def difdivididas(X, Y):
+    # Convert X and Y to numpy arrays if they aren't already
+    X = np.array(X, dtype=float)
+    Y = np.array(Y, dtype=float)
+    
+    n = len(X)
+    D = np.zeros((n, n))  # Divided difference table
+
+    # First column of the table is just the Y values
+    D[:, 0] = Y
+
+    # Compute the divided differences
+    for j in range(1, n):
+        for i in range(n - j):
+            # Calculate each divided difference using the previous column
+            D[i, j] = (D[i + 1, j - 1] - D[i, j - 1]) / (X[i + j] - X[i])
+
+    # The coefficients of the Newton polynomial are the first row elements of each column
+    Coef = D[0, :]
+
+    # Output the divided difference table
+    print("Tabla de diferencias divididas:")
+    for row in D:
+        print(" ".join(f"{x:.6f}" if x != 0 else "0.000000" for x in row))
+    
+    # Output the Newton coefficients
+    print("\nCoeficientes del polinomio de Newton:")
+    print(" ".join(f"{coef:.6f}" for coef in Coef))
+    
+    # Output the Newton polynomial
+    print("\nPolinomio de Newton:")
+    polynomial = f"{Coef[0]:.6f}"
+    for i in range(1, len(Coef)):
+        term = f"{Coef[i]:+.6f}"
+        for k in range(i):
+            term += f"(x-{X[k]:.6f})"
+        polynomial += " " + term
+    print(polynomial)
+    
+    return Coef
+
+def lagrange(X, Y):
+    # Convert X and Y to numpy arrays if they aren't already
+    X = np.array(X, dtype=float)
+    Y = np.array(Y, dtype=float)
+    
+    n = len(X)
+    L = np.zeros((n, n))  # Lagrange basis polynomials as rows
+
+    # Construct Lagrange basis polynomials
+    for i in range(n):
+        # Exclude X[i] from the product terms
+        aux0 = np.delete(X, i)
+        aux = np.array([1.0])
+        
+        # Construct the polynomial L_i(x) for each i
+        for xj in aux0:
+            aux = np.convolve(aux, [1, -xj])  # Multiply by (x - xj)
+        
+        # Normalize L_i(x) so that L_i(X[i]) = 1
+        L[i, :] = (aux / np.polyval(aux, X[i])).tolist() + [0] * (n - len(aux))
+
+    # Compute coefficients of the interpolating polynomial by summing Lagrange terms
+    Coef = Y @ L
+
+    # Output Lagrange basis polynomials
+    print("\nPolinomios interpolantes de Lagrange:")
+    for i, row in enumerate(L):
+        terms = " + ".join(f"{coef:.6f}x^{j}" for j, coef in enumerate(row[::-1]) if coef != 0)
+        print(f"L{i}: {terms}")
+    
+    # Output interpolating polynomial
+    polynomial = " + ".join(f"{Coef[i]:.6f}*L{i}" for i in range(n))
+    print("\nPolinomio:")
+    print(polynomial)
+    
+    return L, Coef
+
+
+def trazlin(X, Y):
+    X = np.array(X, dtype=float)
+    Y = np.array(Y, dtype=float)
+
+    n = len(X)
+    m = 2 * (n - 1)
+    A = np.zeros((m, m))
+    b = np.zeros(m)
+
+    # Interpolation conditions
+    for i in range(n - 1):
+        A[i, 2 * i:2 * i + 2] = [X[i + 1], 1]
+        b[i] = Y[i + 1]
+    A[n - 1, 0:2] = [X[0], 1]
+    b[n - 1] = Y[0]
+
+    # Continuity conditions
+    for i in range(1, n - 1):
+        A[n - 1 + i, 2 * i - 2:2 * i + 2] = [X[i], 1, -X[i], -1]
+        b[n - 1 + i] = 0
+
+    # Print matrix A and vector b for inspection
+    print("Matrix A:\n", A)
+    print("Vector b:\n", b)
+
+    # Solve the system
+    try:
+        Saux = np.linalg.solve(A, b)
+    except np.linalg.LinAlgError:
+        print("Error: Singular matrix detected.")
+        return None
+
+    # Organize output coefficients
+    Coef = np.zeros((n - 1, 2))
+    for i in range(n - 1):
+        Coef[i, :] = Saux[2 * i:2 * i + 2]
+
+    # Print the tracers for debugging
+    print("\nCoeficientes de los trazadores lineales:")
+    for i, (a, b) in enumerate(Coef):
+        print(f"{a:.6f}x + {b:.6f}")
+
+    return Coef
+
+def trazcuad(X, Y):
+    X = np.array(X, dtype=float)
+    Y = np.array(Y, dtype=float)
+
+    n = len(X)
+    m = 3 * (n - 1)
+    A = np.zeros((m, m))
+    b = np.zeros(m)
+
+    # Interpolation conditions
+    for i in range(n - 1):
+        A[i, 3 * i:3 * i + 3] = [X[i + 1]**2, X[i + 1], 1]
+        b[i] = Y[i + 1]
+    A[n - 1, 0:3] = [X[0]**2, X[0], 1]
+    b[n - 1] = Y[0]
+
+    # Continuity conditions
+    for i in range(1, n - 1):
+        A[n - 1 + i, 3 * i - 3:3 * i + 3] = [X[i]**2, X[i], 1, -X[i]**2, -X[i], -1]
+        b[n - 1 + i] = 0
+
+    # Smoothness conditions
+    for i in range(1, n - 1):
+        A[2 * (n - 1) - 1 + i, 3 * i - 3:3 * i + 3] = [2 * X[i], 1, 0, -2 * X[i], -1, 0]
+        b[2 * (n - 1) - 1 + i] = 0
+
+    # Boundary condition for the quadratic spline (second derivative zero at endpoints)
+    A[-1, 0] = 2
+    b[-1] = 0
+
+    # Print matrix A and vector b for inspection
+    print("Matrix A:\n", A)
+    print("Vector b:\n", b)
+
+    # Solve the system
+    try:
+        Saux = np.linalg.solve(A, b)
+    except np.linalg.LinAlgError:
+        print("Error: Singular matrix detected.")
+        return None
+
+    # Organize output coefficients
+    Coef = np.zeros((n - 1, 3))
+    for i in range(n - 1):
+        Coef[i, :] = Saux[3 * i:3 * i + 3]
+
+    # Print the tracers for debugging
+    print("\nCoeficientes de los trazadores cuadráticos:")
+    for i, (a, b, c) in enumerate(Coef):
+        print(f"{a:.6f}x^2 + {b:.6f}x + {c:.6f}")
+
+    return Coef
+
+def trazcub(X, Y):
+    X = np.array(X, dtype=float)
+    Y = np.array(Y, dtype=float)
+    n = len(X)
+    m = 4 * (n - 1)
+
+    A = np.zeros((m, m))
+    b = np.zeros(m)
+
+    # Interpolation conditions (fitting the splines to points)
+    row = 0
+    for i in range(n - 1):
+        A[row, 4 * i:4 * i + 4] = [X[i]**3, X[i]**2, X[i], 1]
+        b[row] = Y[i]
+        row += 1
+        A[row, 4 * i:4 * i + 4] = [X[i + 1]**3, X[i + 1]**2, X[i + 1], 1]
+        b[row] = Y[i + 1]
+        row += 1
+
+    # Continuity conditions (ensuring derivatives match between segments)
+    for i in range(1, n - 1):
+        A[row, 4 * (i - 1):4 * (i + 1)] = [
+            3 * X[i]**2, 2 * X[i], 1, 0,
+            -3 * X[i]**2, -2 * X[i], -1, 0
+        ]
+        b[row] = 0
+        row += 1
+
+    # Smoothness conditions (ensuring second derivatives match between segments)
+    for i in range(1, n - 1):
+        A[row, 4 * (i - 1):4 * (i + 1)] = [
+            6 * X[i], 2, 0, 0,
+            -6 * X[i], -2, 0, 0
+        ]
+        b[row] = 0
+        row += 1
+
+    # Natural spline boundary conditions (second derivative is zero at endpoints)
+    A[row, 0:2] = [6 * X[0], 2]
+    b[row] = 0
+    row += 1
+    A[row, -4:-2] = [6 * X[-1], 2]
+    b[row] = 0
+
+    # Print the matrix A and vector b for inspection
+    print("Matrix A:\n", A)
+    print("Vector b:\n", b)
+
+    # Solve the system
+    try:
+        Saux = np.linalg.solve(A, b)
+    except np.linalg.LinAlgError:
+        print("Error: Singular matrix detected.")
+        return None
+
+    Coef = np.zeros((n - 1, 4))
+    for i in range(n - 1):
+        Coef[i, :] = Saux[4 * i:4 * i + 4]
+
+    print("\nCoeficientes de los trazadores cúbicos:")
+    for i, (a, b, c, d) in enumerate(Coef):
+        print(f"{a:.6f}x^3 + {b:.6f}x^2 + {c:.6f}x + {d:.6f}")
+
+    return Coef
+
+
 
 A = [[4,-1,0,3], [1,15.5,3,8], [0,-1.3,-4,1.1], [14,5,-2,30]]
 b = [1, 1, 1, 1]
@@ -205,7 +447,8 @@ x0 = [0, 0, 0, 0]
 tol = 1e-7
 N_max = 100
 w = 1.5
-   
+x=[-1,0,3,4]
+y=[15.5,3,8,1]
 LU_simple(A, b)
 print("----------------------------------------------------------------------------------------------------------")
 LU_partial(A, b)
@@ -214,3 +457,12 @@ seidel(A, b, x0, tol, N_max)
 print("----------------------------------------------------------------------------------------------------------")
 SOR(A, b, x0, w, tol, N_max)
 print("----------------------------------------------------------------------------------------------------------")
+difdivididas(x,y)
+print("----------------------------------------------------------------------------------------------------------")
+lagrange(x,y)
+print("----------------------------------------------------------------------------------------------------------")
+trazlin(x,y)
+print("----------------------------------------------------------------------------------------------------------")
+trazcuad(x,y)
+print("----------------------------------------------------------------------------------------------------------")
+trazcub(x,y)

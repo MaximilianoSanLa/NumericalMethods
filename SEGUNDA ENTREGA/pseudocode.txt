@@ -1,0 +1,73 @@
+LU_SIMPLE(A, b):
+    Initialize L as identity matrix of size n
+    Initialize U as zero matrix of size n x n
+    Copy A into matrix M
+    For i from 0 to n-2:
+        For j from i+1 to n-1:
+            If M[j, i] is not zero:
+                L[j, i] = M[j, i] / M[i, i]
+                Subtract (M[j, i] / M[i, i]) * M[i, :] from M[j, :]
+        Copy row i of M to row i of U
+    Apply progressive substitution with L and b to find z
+    Apply regressive substitution with U and z to find x
+    Return x
+
+
+LU_PARTIAL(A, b):
+    Initialize L as identity matrix of size n
+    Initialize U as zero matrix of size n x n
+    Initialize P as identity matrix of size n
+    Copy A into matrix M
+    For i from 0 to n-2:
+        Find max_index such that M[max_index, i] is maximum in column i
+        If M[max_index, i] is larger than M[i, i]:
+            Swap rows i and max_index in M and P
+        For j from i+1 to n-1:
+            If M[j, i] is not zero:
+                L[j, i] = M[j, i] / M[i, i]
+                Subtract (M[j, i] / M[i, i]) * M[i, :] from M[j, :]
+        Copy row i of M to row i of U
+    Apply progressive substitution with L and P*b to find z
+    Apply regressive substitution with U and z to find x
+    Return x
+
+
+GAUSS_SEIDEL(A, b, x0, tol, Nmax):
+    Initialize xant as x0
+    Compute diagonal matrix D, lower triangular matrix L, and upper triangular matrix U
+    Compute matrix T and vector C for Gauss-Seidel iteration
+    While error E > tol and iteration count < Nmax:
+        Update xact using T * xant + C
+        Compute error E as the norm of (xact - xant)
+        Update xant with xact
+        Store iteration count, error, and solution vector
+    Return final solution
+
+SOR(A, b, x0, w, tol, Nmax):
+    Initialize xant as x0
+    Compute diagonal matrix D, lower triangular matrix L, and upper triangular matrix U
+    Compute matrix T and vector C for SOR iteration
+    While error E > tol and iteration count < Nmax:
+        Update xact using T * xant + C
+        Compute error E as the norm of (xact - xant)
+        Update xant with xact
+        Store iteration count, error, and solution vector
+    Return final solution
+
+DIFF_DIVIDED(X, Y):
+    Initialize table D with Y values
+    For each divided difference D[i, j]:
+        Compute D[i, j] as the difference between D[i+1, j-1] and D[i, j-1] divided by (X[i+j] - X[i])
+    Extract Newton coefficients from the first row of the table
+    Output divided difference table and Newton coefficients
+    Construct and output Newton polynomial using the coefficients
+
+LAGRANGE(X, Y):
+    Initialize matrix L with Lagrange basis polynomials
+    For each basis polynomial L[i]:
+        Construct polynomial L[i](x) using the product of (x - X[j]) terms for j ≠ i
+        Normalize each Lagrange polynomial so L[i](X[i]) = 1
+    Compute the interpolating polynomial using the weighted sum of Lagrange polynomials
+    Output Lagrange basis polynomials and interpolating polynomial
+    Return Lagrange polynomials and coefficients
+
