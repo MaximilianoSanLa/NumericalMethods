@@ -71,3 +71,228 @@ LAGRANGE(X, Y):
     Output Lagrange basis polynomials and interpolating polynomial
     Return Lagrange polynomials and coefficients
 
+TRAZLIN(X, Y):
+    Convert X and Y to arrays of type float
+    Initialize n as the number of points in X
+    Initialize m as 2 * (n - 1) for the system dimensions
+    Create an m x m zero matrix A
+    Create a zero vector b of size m
+
+    # Interpolation conditions
+    For each interval i from 0 to n - 2:
+        Set A[i, 2 * i:2 * i + 2] using X[i + 1] and 1
+        Set b[i] to Y[i + 1]
+    Set the initial boundary condition in A using X[0] and Y[0]
+
+    # Continuity conditions
+    For each interior point i from 1 to n - 2:
+        Set A[n - 1 + i, 2 * i - 2:2 * i + 2] for continuity using X[i]
+        Set b[n - 1 + i] to 0
+
+    Print matrices A and b for inspection
+
+    # Solve the system
+    Try solving A * Saux = b
+        If successful, store the solution in Saux
+        Else, print an error and return None
+
+    # Organize output coefficients
+    Initialize Coef as a (n - 1) x 2 zero matrix
+    For each interval i from 0 to n - 2:
+        Assign coefficients from Saux to Coef[i]
+
+    Print and return Coef
+
+TRAZCUAD(X, Y):
+    Convert X and Y to arrays of type float
+    Initialize n as the number of points in X
+    Initialize m as 3 * (n - 1) for the system dimensions
+    Create an m x m zero matrix A
+    Create a zero vector b of size m
+
+    # Interpolation conditions
+    For each interval i from 0 to n - 2:
+        Set A[i, 3 * i:3 * i + 3] using X[i + 1]^2, X[i + 1], and 1
+        Set b[i] to Y[i + 1]
+    Set the initial boundary condition in A using X[0] and Y[0]
+
+    # Continuity conditions
+    For each interior point i from 1 to n - 2:
+        Set A[n - 1 + i, 3 * i - 3:3 * i + 3] for continuity using X[i]
+        Set b[n - 1 + i] to 0
+
+    # Smoothness conditions
+    For each interior point i from 1 to n - 2:
+        Set A[2 * (n - 1) - 1 + i, 3 * i - 3:3 * i + 3] for smoothness
+        Set b[2 * (n - 1) - 1 + i] to 0
+
+    # Boundary condition for natural spline
+    Set the last row of A for the zero second derivative at endpoint
+    Set the corresponding value in b
+
+    Print matrices A and b for inspection
+
+    # Solve the system
+    Try solving A * Saux = b
+        If successful, store the solution in Saux
+        Else, print an error and return None
+
+    # Organize output coefficients
+    Initialize Coef as a (n - 1) x 3 zero matrix
+    For each interval i from 0 to n - 2:
+        Assign coefficients from Saux to Coef[i]
+
+    Print and return Coef
+TRAZCUB(X, Y):
+    Convert X and Y to arrays of type float
+    Initialize n as the number of points in X
+    Initialize m as 4 * (n - 1) for the system dimensions
+    Create an m x m zero matrix A
+    Create a zero vector b of size m
+
+    # Interpolation conditions (matching the spline to points)
+    Initialize row as 0
+    For each interval i from 0 to n - 2:
+        Set A[row] using X[i]^3, X[i]^2, X[i], and 1
+        Set b[row] to Y[i]
+        Increment row
+        Set A[row] using X[i + 1]^3, X[i + 1]^2, X[i + 1], and 1
+        Set b[row] to Y[i + 1]
+        Increment row
+
+    # Continuity conditions (first derivative continuity)
+    For each interior point i from 1 to n - 2:
+        Set A[row, 4 * (i - 1):4 * (i + 1)] for continuity using X[i]
+        Set b[row] to 0
+        Increment row
+
+    # Smoothness conditions (second derivative continuity)
+    For each interior point i from 1 to n - 2:
+        Set A[row, 4 * (i - 1):4 * (i + 1)] for smoothness using X[i]
+        Set b[row] to 0
+        Increment row
+
+    # Natural spline boundary conditions (second derivative zero at endpoints)
+    Set boundary conditions in the first and last rows of A for X[0] and X[-1]
+    Set corresponding values in b to 0
+
+    Print matrices A and b for inspection
+
+    # Solve the system
+    Try solving A * Saux = b
+        If successful, store the solution in Saux
+        Else, print an error and return None
+
+    # Organize output coefficients
+    Initialize Coef as a (n - 1) x 4 zero matrix
+    For each interval i from 0 to n - 2:
+        Assign coefficients from Saux to Coef[i]
+
+    Print and return Coef
+CHOLESKY(A, b):
+    Initialize n as the size of matrix A
+    Initialize matrix L as an n x n zero matrix for complex or real numbers
+
+    Print initial matrix A
+
+    For each row i from 0 to n - 1:
+        For each column j from 0 to i:
+            If i equals j (diagonal element):
+                Compute L[i, j] as the square root of (A[i, i] - sum of squares of L[i, k] for k < j)
+            Else:
+                Compute L[i, j] as (A[i, j] - sum of products L[i, k] * L[j, k] for k < j) / L[j, j]
+
+        Print matrices L and U at each stage, where U is the conjugate transpose of L
+
+    # Forward substitution to solve Ly = b
+    Initialize y as a zero vector of length n
+    For each row i from 0 to n - 1:
+        Compute y[i] as (b[i] - sum of products L[i, k] * y[k] for k < i) / L[i, i]
+
+    # Back substitution to solve Ux = y
+    Initialize x as a zero vector of length n
+    For each row i from n - 1 to 0 (in reverse order):
+        Compute x[i] as (y[i] - sum of products U[i, k] * x[k] for k > i) / U[i, i]
+
+    Print final solution vector x
+    Return x
+CROUT(A, b):
+    Initialize n as the size of matrix A
+    Initialize matrix L as an n x n zero matrix
+    Initialize matrix U as an identity matrix of size n x n
+
+    Print initial matrix A
+
+    For each column j from 0 to n - 1:
+        For each row i from j to n - 1:
+            Compute L[i, j] as A[i, j] - sum of products L[i, k] * U[k, j] for k < j
+        For each row i from j + 1 to n - 1:
+            Compute U[j, i] as (A[j, i] - sum of products L[j, k] * U[k, i] for k < j) / L[j, j]
+
+        Print matrices L and U at each stage
+
+    # Forward substitution to solve Ly = b
+    Initialize y as a zero vector of length n
+    For each row i from 0 to n - 1:
+        Compute y[i] as (b[i] - sum of products L[i, k] * y[k] for k < i) / L[i, i]
+
+    # Back substitution to solve Ux = y
+    Initialize x as a zero vector of length n
+    For each row i from n - 1 to 0 (in reverse order):
+        Compute x[i] as y[i] - sum of products U[i, k] * x[k] for k > i
+
+    Print final solution vector x
+    Return x
+DOOLITTLE(A, b):
+    Initialize n as the size of matrix A
+    Initialize matrix L as an identity matrix of size n x n
+    Initialize matrix U as an n x n zero matrix
+
+    Print initial matrix A
+
+    For each column j from 0 to n - 1:
+        For each row i from j to n - 1:
+            Compute U[j, i] as A[j, i] - sum of products L[j, k] * U[k, i] for k < j
+        For each row i from j + 1 to n - 1:
+            Compute L[i, j] as (A[i, j] - sum of products L[i, k] * U[k, j] for k < j) / U[j, j]
+
+        Print matrices L and U at each stage
+
+    # Forward substitution to solve Ly = b
+    Initialize y as a zero vector of length n
+    For each row i from 0 to n - 1:
+        Compute y[i] as b[i] - sum of products L[i, k] * y[k] for k < i
+
+    # Back substitution to solve Ux = y
+    Initialize x as a zero vector of length n
+    For each row i from n - 1 to 0 (in reverse order):
+        Compute x[i] as (y[i] - sum of products U[i, k] * x[k] for k > i) / U[i, i]
+
+    Print final solution vector x
+    Return x
+JACOBI(A, b, x0, tol, n):
+    Initialize m as an empty string
+    Set D as the diagonal matrix of A
+    Set LU as A - D
+    Set D_inv as the inverse of D
+    Compute T as -D_inv * LU
+    Compute C as D_inv * b
+
+    # Spectral radius calculation
+    Calculate eigenvalues of T and set spectral_radius as the maximum absolute value of eigenvalues
+
+    Print matrix T and vector C
+    Print spectral radius
+    Print header for iteration results
+
+    Set x as the initial guess x0
+    For each iteration i from 0 to n - 1:
+        Set x_temp as the current value of x
+        Compute x as D_inv * (-LU * x + b)
+        Calculate error_absoluto as the norm of (x - x_temp)
+
+        Print iteration number, error, and current values of x
+        If the error_absoluto is less than tol:
+            Return x
+
+    Return x
