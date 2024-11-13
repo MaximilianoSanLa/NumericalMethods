@@ -296,3 +296,32 @@ JACOBI(A, b, x0, tol, n):
             Return x
 
     Return x
+
+VANDERMONDE_MATRIX(x):
+    Set n as the length of vector x
+    Generate Vandermonde matrix V with x as input
+    Print "Vandermonde matrix:"
+
+    For each row in V:
+        Format each element in the row to six decimal places
+        Print the formatted row
+
+    Return matrix V
+    
+POLYNOMIAL_STRING(coef, x):
+    Set n as the length of coefficient vector coef
+    Initialize an empty list, terms, to store terms of the polynomial string
+
+    For each index i from 0 to n - 1:
+        Set term as coef[i] formatted to six decimal places
+        Set grado as (n - 1 - i), the exponent of x for the current term
+
+        If grado is greater than 0:
+            Append "x^grado" to term
+
+        If coef[i] is positive and i is not the first term:
+            Add "+" before term in terms list
+        Else:
+            Add term directly to terms list
+
+    Return the polynomial as a single string by joining terms list
