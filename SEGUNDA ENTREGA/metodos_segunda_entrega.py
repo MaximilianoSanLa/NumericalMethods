@@ -374,9 +374,6 @@ def trazcuad(X, Y):
 
     return Coef
 
-
-import numpy as np
-
 def trazcub(X, Y):
     X = np.array(X, dtype=float)
     Y = np.array(Y, dtype=float)
