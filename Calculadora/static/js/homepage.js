@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const cholesky_method_form = document.getElementById("cholesky_method_form");
     const jacobi_method_form = document.getElementById("jacobi_method_form");
     const seidel_method_form = document.getElementById("seidel_method_form");
+    const difdivididas_method_form = document.getElementById("difdivididas_method_form");
     const SOR_method_form = document.getElementById("SOR_method_form");
     const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let tolerance;
@@ -44,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
         jacobi_method_form.style.display = "none";
         seidel_method_form.style.display = "none";
         SOR_method_form.style.display = "none";
+        difdivididas_method_form.style.display = "none";
     }
 
     // Display the incremental search method form
@@ -186,6 +188,13 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         hide_all_forms();
         SOR_method_form.style.display = "block";
+    });
+
+    // Display difdivididas method form
+    document.getElementById("show_difdivididas_method_form").addEventListener("click", function(e){
+        e.preventDefault();
+        hide_all_forms();
+        difdivididas_method_form.style.display = "block";
     });
 
     //Incremental search method
@@ -1218,6 +1227,51 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => console.log("Error: ", error));
     });
 
+    // difdivididas method
+    document.getElementById("difdivididas_method_form").addEventListener("submit", function(e){
+        e.preventDefault();
+        const existing_graph = document.getElementById("graph");
+        if (existing_graph) {
+            existing_graph.innerHTML="";
+        }
+        updateMethodTitle("Divided Diferences Method");
+        
+        x = document.getElementById("x_difdivididas_method").value;
+        y = document.getElementById("y_difdividias_method").value;
+        console.log(x,y);
+
+        fetch("/Calculator/difdivididas_method/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                x: x, 
+                y: y
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+                let result_container = document.getElementById("result");
+                result_container.innerHTML = "";
+                const existing_table = document.getElementById("table");
+                if (existing_table) {
+                    existing_table.innerHTML="";
+                }
+                create_table(data.divided_difference_table, "Diferences table");
+                create_table(data.newton_coefficients, "Coefficients");
+                let SR_result = document.createElement("p");
+    
+                SR_result.innerHTML = `Newton's Polynomial: ${data.newton_polynomial}`;
+                result_container.appendChild(SR_result);
+                
+                difdivididas_method_form.style.display = "none"
+        })
+        .catch(error => console.log("Error: ", error));
+    });
+
     // Function that creates tables
     function create_table(data, method) {
         const table = document.createElement('table');
@@ -1342,7 +1396,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 headers_row.appendChild(header_cel);
             });
         } 
-        else if (method === "gaussian_simple_elimination" || method === "LU_simple" || method === "LU_partial") {
+        else if (method === "gaussian_simple_elimination" || method === "LU_simple" || method === "LU_partial" || method == "Coefficients") {
             caption.textContent = "Coefficients"; 
             table.appendChild(caption);
             const tbody = document.createElement('tbody');
@@ -1380,7 +1434,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return; // Salir de la función después de manejar este caso
             
         } 
-        else if (method === "Matrix L" || method === "Matrix U" || method === "Matrix P" || method === "Matrix T") {
+        else if (method === "Matrix L" || method === "Matrix U" || method === "Matrix P" || method === "Matrix T" || method === "Diferences table") {
             caption.textContent = method; 
             table.appendChild(caption); // Nuevo manejo para matrices
             data.forEach(row => {

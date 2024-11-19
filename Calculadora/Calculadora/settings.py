@@ -26,7 +26,6 @@ SECRET_KEY = 'django-insecure-*tq-68os#s)*yx8ksd!2wk^+hrrvbezvo%za*5^1^($7^s)o79
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -126,6 +125,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'e0a7-2800-484-997a-aaf0-7882-6f54-5d4-5304.ngrok-free.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'e0a7-2800-484-997a-aaf0-7882-6f54-5d4-5304.ngrok-free.app',"*"]
 
+SESSION_COOKIE_DOMAIN = None
 

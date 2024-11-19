@@ -13,6 +13,7 @@ import base64
 import sympy as sp
 import json
 import sys
+import ast
 def Calculator(request):
     nombre = metodo.objects.all()
     template = loader.get_template('homepage.html')
@@ -748,17 +749,15 @@ def vandermonde(x):
     return V
 
 
-def difdivididas(request):
+def difdivididas(request): 
     try:
-        # Fetch X and Y from GET parameters
-        X = list(map(float, request.GET.getlist('X')))
-        Y = list(map(float, request.GET.getlist('Y')))
+        data = json.loads(request.body)
+        X = np.array(ast.literal_eval(data["x"]), dtype=float)
+        Y = np.array(ast.literal_eval(data["y"]), dtype=float)
 
         if len(X) != len(Y) or len(X) < 2:
             raise ValueError("X and Y must have the same length, and at least 2 points are required.")
-
-        X = np.array(X, dtype=float)
-        Y = np.array(Y, dtype=float)
+        
         n = len(X)
         
         # Initialize the divided difference table
@@ -768,10 +767,16 @@ def difdivididas(request):
         # Compute divided differences
         for j in range(1, n):
             for i in range(n - j):
-                D[i, j] = (D[i + 1, j - 1] - D[i, j - 1]) / (X[i + j] - X[i])
+                D[i + j, j] = (D[i + j, j - 1] - D[i + j - 1, j - 1]) / (X[i + j] - X[i])
 
         # Extract the coefficients (first row of the table)
-        Coef = D[0, :].tolist()
+        Coef = D.diagonal().tolist()
+
+        # Create a lower triangular table
+        D_lower = np.zeros_like(D)
+        for i in range(n):
+            for j in range(i + 1):
+                D_lower[i, j] = D[i, j]
 
         # Construct Newton's polynomial
         polynomial = f"{Coef[0]:.6f}"
@@ -782,7 +787,7 @@ def difdivididas(request):
             polynomial += " " + term
 
         return JsonResponse({
-            "divided_difference_table": D.tolist(),
+            "divided_difference_table": D_lower.tolist(),
             "newton_coefficients": Coef,
             "newton_polynomial": polynomial,
             "message": "Divided differences computed successfully"
@@ -790,6 +795,8 @@ def difdivididas(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+
+
 def lagrange(request):
     try:
         # Fetch X and Y from GET parameters
