@@ -799,15 +799,12 @@ def difdivididas(request):
 
 def lagrange(request):
     try:
-        # Fetch X and Y from GET parameters
-        X = list(map(float, request.GET.getlist('X')))
-        Y = list(map(float, request.GET.getlist('Y')))
+        data = json.loads(request.body)
+        X = np.array(ast.literal_eval(data["x"]), dtype=float)
+        Y = np.array(ast.literal_eval(data["y"]), dtype=float)
 
         if len(X) != len(Y) or len(X) < 2:
             raise ValueError("X and Y must have the same length, and at least 2 points are required.")
-
-        X = np.array(X, dtype=float)
-        Y = np.array(Y, dtype=float)
         n = len(X)
 
         # Initialize the Lagrange basis polynomials
@@ -839,25 +836,32 @@ def lagrange(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+    
 def trazlin(request):
     try:
-        # Fetch X and Y from GET parameters
-        X = list(map(float, request.GET.getlist('X')))
-        Y = list(map(float, request.GET.getlist('Y')))
+        data = json.loads(request.body)
+        X = np.array(ast.literal_eval(data["x"]), dtype=float)
+        Y = np.array(ast.literal_eval(data["y"]), dtype=float)
 
         if len(X) != len(Y) or len(X) < 2:
             raise ValueError("X and Y must have the same length, and at least 2 points are required.")
 
         # Calculate the coefficients for each segment
         coefficients = []
+        trazadores = []  # Lista para almacenar las ecuaciones de los trazadores
         for i in range(len(X) - 1):
             # Compute slope (m) and intercept (b) for each segment
             m = (Y[i+1] - Y[i]) / (X[i+1] - X[i])
             b = Y[i] - m * X[i]
-            coefficients.append({'m': m, 'b': b, 'segment': (X[i], X[i+1])})
+            coefficients.append([m, b])
+            
+            # Crear ecuación del trazador en formato y = mx + b
+            trazador = f"{m:.6f}x + {b:.6f}"
+            trazadores.append(trazador)
 
         return JsonResponse({
             "coefficients": coefficients,
+            "splines": trazadores,
             "message": "Linear interpolation computed successfully"
         })
 
@@ -865,127 +869,132 @@ def trazlin(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+
 def trazcuad(request):
-    # Example input data
-    X = [1, 2, 3, 4]
-    Y = [1, 4, 9, 16]
-
-    # Convert to numpy arrays
-    X = np.array(X, dtype=float)
-    Y = np.array(Y, dtype=float)
-
-    n = len(X)
-    m = 3 * (n - 1)
-    A = np.zeros((m, m))
-    b = np.zeros(m)
-
-    # Interpolation conditions
-    for i in range(n - 1):
-        A[i, 3 * i:3 * i + 3] = [X[i + 1]**2, X[i + 1], 1]
-        b[i] = Y[i + 1]
-    A[n - 1, 0:3] = [X[0]**2, X[0], 1]
-    b[n - 1] = Y[0]
-
-    # Continuity conditions
-    for i in range(1, n - 1):
-        A[n - 1 + i, 3 * i - 3:3 * i + 3] = [X[i]**2, X[i], 1, -X[i]**2, -X[i], -1]
-        b[n - 1 + i] = 0
-
-    # Smoothness conditions
-    for i in range(1, n - 1):
-        A[2 * (n - 1) - 1 + i, 3 * i - 3:3 * i + 3] = [2 * X[i], 1, 0, -2 * X[i], -1, 0]
-        b[2 * (n - 1) - 1 + i] = 0
-
-    # Boundary condition for the quadratic spline (second derivative zero at endpoints)
-    A[-1, 0] = 2
-    b[-1] = 0
-
-    # Solve the system
     try:
-        Saux = np.linalg.solve(A, b)
-    except np.linalg.LinAlgError:
-        return JsonResponse({"error": "Singular matrix detected."})
+        data = json.loads(request.body)
+        X = np.array(ast.literal_eval(data["x"]), dtype=float)
+        Y = np.array(ast.literal_eval(data["y"]), dtype=float)
 
-    # Organize output coefficients
-    Coef = np.zeros((n - 1, 3))
-    for i in range(n - 1):
-        Coef[i, :] = Saux[3 * i:3 * i + 3]
+        n = len(X)
+        m = 3 * (n - 1)
+        A = np.zeros((m, m))
+        b = np.zeros(m)
 
-    # Format coefficients for output
-    Coef_list = [{"coef": f"{a:.6f}x^2 + {b:.6f}x + {c:.6f}"} for a, b, c in Coef]
+        # Interpolation conditions
+        for i in range(n - 1):
+            A[i, 3 * i:3 * i + 3] = [X[i + 1]**2, X[i + 1], 1]
+            b[i] = Y[i + 1]
+        A[n - 1, 0:3] = [X[0]**2, X[0], 1]
+        b[n - 1] = Y[0]
 
-    return JsonResponse({
-        "method": "Quadratic Splines",
-        "coefficients": Coef_list
-    })
+        # Continuity conditions
+        for i in range(1, n - 1):
+            A[n - 1 + i, 3 * i - 3:3 * i + 3] = [X[i]**2, X[i], 1, -X[i]**2, -X[i], -1]
+            b[n - 1 + i] = 0
 
+        # Smoothness conditions
+        for i in range(1, n - 1):
+            A[2 * (n - 1) - 1 + i, 3 * i - 3:3 * i + 3] = [2 * X[i], 1, 0, -2 * X[i], -1, 0]
+            b[2 * (n - 1) - 1 + i] = 0
+
+        # Boundary condition for the quadratic spline (second derivative zero at endpoints)
+        A[-1, 0] = 2
+        b[-1] = 0
+
+        # Solve the system
+        try:
+            Saux = np.linalg.solve(A, b)
+        except np.linalg.LinAlgError:
+            return JsonResponse({"error": "Singular matrix detected."})
+
+        # Organize output coefficients and splines
+        Coef = []
+        Splines = []
+        for i in range(n - 1):
+            a, b, c = Saux[3 * i:3 * i + 3]
+            Coef.append([a, b, c])
+            trazador = f"{a:.6f}x^2 + {b:.6f}x + {c:.6f}"
+            Splines.append(trazador)
+
+        return JsonResponse({
+            "method": "Quadratic Splines",
+            "coefficients": Coef,
+            "splines": Splines,
+            "message": "Quadratic spline interpolation computed successfully"
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 def trazcub(request):
-    # Example input data
-    X = [1, 2, 3, 4]
-    Y = [1, 4, 9, 16]
-
-    # Convert to numpy arrays
-    X = np.array(X, dtype=float)
-    Y = np.array(Y, dtype=float)
-    n = len(X)
-    m = 4 * (n - 1)
-
-    A = np.zeros((m, m))
-    b = np.zeros(m)
-
-    # Interpolation conditions (fitting the splines to points)
-    row = 0
-    for i in range(n - 1):
-        A[row, 4 * i:4 * i + 4] = [X[i]**3, X[i]**2, X[i], 1]
-        b[row] = Y[i]
-        row += 1
-        A[row, 4 * i:4 * i + 4] = [X[i + 1]**3, X[i + 1]**2, X[i + 1], 1]
-        b[row] = Y[i + 1]
-        row += 1
-
-    # Continuity conditions (ensuring derivatives match between segments)
-    for i in range(1, n - 1):
-        A[row, 4 * (i - 1):4 * (i + 1)] = [
-            3 * X[i]**2, 2 * X[i], 1, 0,
-            -3 * X[i]**2, -2 * X[i], -1, 0
-        ]
-        b[row] = 0
-        row += 1
-
-    # Smoothness conditions (ensuring second derivatives match between segments)
-    for i in range(1, n - 1):
-        A[row, 4 * (i - 1):4 * (i + 1)] = [
-            6 * X[i], 2, 0, 0,
-            -6 * X[i], -2, 0, 0
-        ]
-        b[row] = 0
-        row += 1
-
-    # Natural spline boundary conditions (second derivative is zero at endpoints)
-    A[row, 0:2] = [6 * X[0], 2]
-    b[row] = 0
-    row += 1
-    A[row, -4:-2] = [6 * X[-1], 2]
-    b[row] = 0
-
-    # Solve the system
     try:
-        Saux = np.linalg.solve(A, b)
-    except np.linalg.LinAlgError:
-        return JsonResponse({"error": "Singular matrix detected."})
+        # Example input data
+        data = json.loads(request.body)
+        X = np.array(ast.literal_eval(data["x"]), dtype=float)
+        Y = np.array(ast.literal_eval(data["y"]), dtype=float)
+        n = len(X)
+        m = 4 * (n - 1)
 
-    # Organize output coefficients
-    Coef = np.zeros((n - 1, 4))
-    for i in range(n - 1):
-        Coef[i, :] = Saux[4 * i:4 * i + 4]
+        A = np.zeros((m, m))
+        b = np.zeros(m)
 
-    # Format coefficients for output
-    Coef_list = [{"coef": f"{a:.6f}x^3 + {b:.6f}x^2 + {c:.6f}x + {d:.6f}"} for a, b, c, d in Coef]
+        # Interpolation conditions (fitting the splines to points)
+        row = 0
+        for i in range(n - 1):
+            A[row, 4 * i:4 * i + 4] = [X[i]**3, X[i]**2, X[i], 1]
+            b[row] = Y[i]
+            row += 1
+            A[row, 4 * i:4 * i + 4] = [X[i + 1]**3, X[i + 1]**2, X[i + 1], 1]
+            b[row] = Y[i + 1]
+            row += 1
 
-    return JsonResponse({
-        "method": "Cubic Splines",
-        "coefficients": Coef_list
-    })
-    
+        # Continuity conditions (ensuring derivatives match between segments)
+        for i in range(1, n - 1):
+            A[row, 4 * (i - 1):4 * (i + 1)] = [
+                3 * X[i]**2, 2 * X[i], 1, 0,
+                -3 * X[i]**2, -2 * X[i], -1, 0
+            ]
+            b[row] = 0
+            row += 1
 
+        # Smoothness conditions (ensuring second derivatives match between segments)
+        for i in range(1, n - 1):
+            A[row, 4 * (i - 1):4 * (i + 1)] = [
+                6 * X[i], 2, 0, 0,
+                -6 * X[i], -2, 0, 0
+            ]
+            b[row] = 0
+            row += 1
+
+        # Natural spline boundary conditions (second derivative is zero at endpoints)
+        A[row, 0:2] = [6 * X[0], 2]
+        b[row] = 0
+        row += 1
+        A[row, -4:-2] = [6 * X[-1], 2]
+        b[row] = 0
+
+        # Solve the system
+        try:
+            Saux = np.linalg.solve(A, b)
+        except np.linalg.LinAlgError:
+            return JsonResponse({"error": "Singular matrix detected."})
+
+        # Organize output coefficients and splines
+        Coef = []
+        Splines = []
+        for i in range(n - 1):
+            a, b, c, d = Saux[4 * i:4 * i + 4]
+            Coef.append([a, b, c, d])
+            trazador = f"{a:.6f}x^3 + {b:.6f}x^2 + {c:.6f}x + {d:.6f}"
+            Splines.append(trazador)
+
+        return JsonResponse({
+            "method": "Cubic Splines",
+            "coefficients": Coef,
+            "splines": Splines,
+            "message": "Cubic spline interpolation computed successfully"
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

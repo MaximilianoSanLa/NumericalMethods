@@ -107,7 +107,13 @@
                     <div class="dropdown-divider"></div>
                     <button id="show_difdivididas_method_form" class = "btn">Divided Diferences</button>
                     <div class="dropdown-divider"></div>
-                    <button id="show_SOR_method_form" class = "btn">SOR</button>
+                    <button id="show_lagrange_method_form" class = "btn">Lagrange</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_trazlin_method_form" class = "btn">Linear</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_trazcuad_method_form" class = "btn">Quadratic</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_trazcub_method_form" class = "btn">Cubic</button>
                 </div>                
               </li>
             </ul>
@@ -486,6 +492,58 @@
             <div class="form-group">
                 <label for="y_difdividias_method">Enter vector y:</label>
                 <input type="text" id="y_difdividias_method" name="y_difdividias_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show lagrange method form {% endcomment %}
+        <form id="lagrange_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="x_lagrange_method">Enter vector x:</label>
+                <input type="text" id="x_lagrange_method" name="x_lagrange_method" placeholder="e.g. [1,2,3,5]" required>
+            </div>
+            <div class="form-group">
+                <label for="y_lagrange_method">Enter vector y:</label>
+                <input type="text" id="y_lagrange_method" name="y_lagrange_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show trazlin method form {% endcomment %}
+        <form id="trazlin_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="x_trazlin_method">Enter vector x:</label>
+                <input type="text" id="x_trazlin_method" name="x_trazlin_method" placeholder="e.g. [1,2,3,5]" required>
+            </div>
+            <div class="form-group">
+                <label for="y_trazlin_method">Enter vector y:</label>
+                <input type="text" id="y_trazlin_method" name="y_trazlin_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show trazcuad method form {% endcomment %}
+        <form id="trazcuad_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="x_trazcuad_method">Enter vector x:</label>
+                <input type="text" id="x_trazcuad_method" name="x_trazcuad_method" placeholder="e.g. [1,2,3,5]" required>
+            </div>
+            <div class="form-group">
+                <label for="y_trazcuad_method">Enter vector y:</label>
+                <input type="text" id="y_trazcuad_method" name="y_trazcuad_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show trazcub method form {% endcomment %}
+        <form id="trazcub_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="x_trazcub_method">Enter vector x:</label>
+                <input type="text" id="x_trazcub_method" name="x_trazcub_method" placeholder="e.g. [1,2,3,5]" required>
+            </div>
+            <div class="form-group">
+                <label for="y_trazcub_method">Enter vector y:</label>
+                <input type="text" id="y_trazcub_method" name="y_trazcub_method" placeholder="e.g. [2,3,4]" required>
             </div>
             <button type="submit" class="btn btn-primary">Show coef</button>
         </form>

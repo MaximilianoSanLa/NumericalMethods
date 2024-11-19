@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const seidel_method_form = document.getElementById("seidel_method_form");
     const difdivididas_method_form = document.getElementById("difdivididas_method_form");
     const SOR_method_form = document.getElementById("SOR_method_form");
+    const lagrange_method_form = document.getElementById("lagrange_method_form");
+    const trazlin_method_form = document.getElementById("trazlin_method_form");
+    const trazcuad_method_form = document.getElementById("trazcuad_method_form");
+    const trazcub_method_form = document.getElementById("trazcub_method_form");
     const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let tolerance;
     let func;
@@ -46,6 +50,9 @@ document.addEventListener("DOMContentLoaded", function() {
         seidel_method_form.style.display = "none";
         SOR_method_form.style.display = "none";
         difdivididas_method_form.style.display = "none";
+        trazlin_method_form.style.display = "none";
+        trazcuad_method_form.style.display = "none";
+        trazcub_method_form.style.display = "none";
     }
 
     // Display the incremental search method form
@@ -195,6 +202,34 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         hide_all_forms();
         difdivididas_method_form.style.display = "block";
+    });
+
+    // Display lagrange method form
+    document.getElementById("show_lagrange_method_form").addEventListener("click", function(e){
+        e.preventDefault();
+        hide_all_forms();
+        lagrange_method_form.style.display = "block";
+    });
+
+    // Display trazlin method form
+    document.getElementById("show_trazlin_method_form").addEventListener("click", function(e){
+        e.preventDefault();
+        hide_all_forms();
+        trazlin_method_form.style.display = "block";
+    });
+
+    // Display trazcuad method form
+    document.getElementById("show_trazcuad_method_form").addEventListener("click", function(e){
+        e.preventDefault();
+        hide_all_forms();
+        trazcuad_method_form.style.display = "block";
+    });
+
+    // Display trazcub method form
+    document.getElementById("show_trazcub_method_form").addEventListener("click", function(e){
+        e.preventDefault();
+        hide_all_forms();
+        trazcub_method_form.style.display = "block";
     });
 
     //Incremental search method
@@ -1272,6 +1307,168 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => console.log("Error: ", error));
     });
 
+    // lagrange method
+    document.getElementById("lagrange_method_form").addEventListener("submit", function(e){
+        e.preventDefault();
+        const existing_graph = document.getElementById("graph");
+        if (existing_graph) {
+            existing_graph.innerHTML="";
+        }
+        updateMethodTitle("Lagrange Method");
+        
+        x = document.getElementById("x_lagrange_method").value;
+        y = document.getElementById("y_lagrange_method").value;
+
+        fetch("/Calculator/Lagrange_method/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                x: x, 
+                y: y
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+                let result_container = document.getElementById("result");
+                result_container.innerHTML = "";
+                const existing_table = document.getElementById("table");
+                if (existing_table) {
+                    existing_table.innerHTML="";
+                }
+                create_table(data.lagrange_basis_polynomials, "Lagrange interpolation polynomials");
+                let SR_result = document.createElement("p");
+    
+                SR_result.innerHTML = `Polynomial: ${data.interpolating_polynomial}`;
+                result_container.appendChild(SR_result);
+                
+                lagrange_method_form.style.display = "none"
+        })
+        .catch(error => console.log("Error: ", error));
+    });
+
+    // trazlin method
+    document.getElementById("trazlin_method_form").addEventListener("submit", function(e){
+        e.preventDefault();
+        const existing_graph = document.getElementById("graph");
+        if (existing_graph) {
+            existing_graph.innerHTML="";
+        }
+        updateMethodTitle("Linear Method");
+        
+        x = document.getElementById("x_trazlin_method").value;
+        y = document.getElementById("y_trazlin_method").value;
+
+        fetch("/Calculator/Traz_lin_method/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                x: x, 
+                y: y
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+                let result_container = document.getElementById("result");
+                result_container.innerHTML = "";
+                const existing_table = document.getElementById("table");
+                if (existing_table) {
+                    existing_table.innerHTML="";
+                }
+                create_table(data.splines, "Splines");
+                create_table(data.coefficients, "Linear Spline Coefficients");
+                
+                trazlin_method_form.style.display = "none"
+        })
+        .catch(error => console.log("Error: ", error));
+    });
+
+    // trazcuad method
+    document.getElementById("trazcuad_method_form").addEventListener("submit", function(e){
+        e.preventDefault();
+        const existing_graph = document.getElementById("graph");
+        if (existing_graph) {
+            existing_graph.innerHTML="";
+        }
+        updateMethodTitle("Quadratic Spline Method");
+        
+        x = document.getElementById("x_trazcuad_method").value;
+        y = document.getElementById("y_trazcuad_method").value;
+
+        fetch("/Calculator/Traz_cuad_method/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                x: x, 
+                y: y
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+                let result_container = document.getElementById("result");
+                result_container.innerHTML = "";
+                const existing_table = document.getElementById("table");
+                if (existing_table) {
+                    existing_table.innerHTML="";
+                }
+                create_table(data.splines, "Splines");
+                create_table(data.coefficients, "Quadratic Spline Coefficients");
+                
+                trazcuad_method_form.style.display = "none"
+        })
+        .catch(error => console.log("Error: ", error));
+    });
+
+    // trazcub method
+    document.getElementById("trazcub_method_form").addEventListener("submit", function(e){
+        e.preventDefault();
+        const existing_graph = document.getElementById("graph");
+        if (existing_graph) {
+            existing_graph.innerHTML="";
+        }
+        updateMethodTitle("Cubic Spline Method");
+        
+        x = document.getElementById("x_trazcub_method").value;
+        y = document.getElementById("y_trazcub_method").value;
+
+        fetch("/Calculator/Traz_cub_method/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                x: x, 
+                y: y
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+                let result_container = document.getElementById("result");
+                result_container.innerHTML = "";
+                const existing_table = document.getElementById("table");
+                if (existing_table) {
+                    existing_table.innerHTML="";
+                }
+                create_table(data.splines, "Splines");
+                create_table(data.coefficients, "Cubic Spline Coefficients");
+                
+                trazcub_method_form.style.display = "none"
+        })
+        .catch(error => console.log("Error: ", error));
+    });
+
     // Function that creates tables
     function create_table(data, method) {
         const table = document.createElement('table');
@@ -1434,7 +1631,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return; // Salir de la función después de manejar este caso
             
         } 
-        else if (method === "Matrix L" || method === "Matrix U" || method === "Matrix P" || method === "Matrix T" || method === "Diferences table") {
+        else if (method === "Matrix L" || method === "Matrix U" || method === "Matrix P" || method === "Matrix T" || method === "Diferences table" || method == "Lagrange interpolation polynomials") {
             caption.textContent = method; 
             table.appendChild(caption); // Nuevo manejo para matrices
             data.forEach(row => {
@@ -1451,7 +1648,107 @@ document.addEventListener("DOMContentLoaded", function() {
             result_container.appendChild(table);
             return; // Salir después de manejar matrices.
         }
-    
+        else if (method === "Splines") {
+            caption.textContent = "Spline Equations"; 
+            table.appendChild(caption); 
+            
+            // Crear una fila para cada spline
+            data.forEach((spline, index) => {
+                const tr = document.createElement('tr');
+                const tdIndex = document.createElement('td');
+                const tdEquation = document.createElement('td');
+                
+                tdIndex.textContent = `Spline ${index + 1}`;
+                tdEquation.textContent = spline;
+                
+                tr.appendChild(tdIndex);
+                tr.appendChild(tdEquation);
+                table.appendChild(tr);
+            });
+            
+            const result_container = document.getElementById("table");
+            result_container.appendChild(table);
+            return; 
+        }
+        else if (method === "Linear Spline Coefficients") {
+            caption.textContent = "Spline Coefficients"; 
+            table.appendChild(caption);
+        
+            // Crear una fila para cada coeficiente
+            data.forEach((coeff) => {
+                const tr = document.createElement('tr');
+                
+                const tdM = document.createElement('td');
+                const tdB = document.createElement('td');
+                
+                tdM.textContent = coeff[0].toFixed(6); // m
+                tdB.textContent = coeff[1].toFixed(6); // b
+                
+                tr.appendChild(tdM);
+                tr.appendChild(tdB);
+                table.appendChild(tr);
+            });
+        
+            const result_container = document.getElementById("table");
+            result_container.appendChild(table);
+            return;
+        }
+        else if (method === "Quadratic Spline Coefficients") {
+            caption.textContent = "Quadratic Spline Coefficients"; 
+            table.appendChild(caption);
+            
+            // Crear una fila para cada conjunto de coeficientes
+            data.forEach((coeff) => {
+                const tr = document.createElement('tr');
+                
+                const tdA = document.createElement('td');
+                const tdB = document.createElement('td');
+                const tdC = document.createElement('td');
+                
+                tdA.textContent = coeff[0].toFixed(6); // a
+                tdB.textContent = coeff[1].toFixed(6); // b
+                tdC.textContent = coeff[2].toFixed(6); // c
+                
+                tr.appendChild(tdA);
+                tr.appendChild(tdB);
+                tr.appendChild(tdC);
+                table.appendChild(tr);
+            });
+        
+            const result_container = document.getElementById("table");
+            result_container.appendChild(table);
+            return;
+        }
+        else if (method === "Cubic Spline Coefficients") {
+            caption.textContent = "Cubic Spline Coefficients"; 
+            table.appendChild(caption);
+            
+            // Crear una fila para cada conjunto de coeficientes
+            data.forEach((coeff) => {
+                const tr = document.createElement('tr');
+                
+                const tdA = document.createElement('td');
+                const tdB = document.createElement('td');
+                const tdC = document.createElement('td');
+                const tdD = document.createElement('td');
+                
+                tdA.textContent = coeff[0].toFixed(6); // a
+                tdB.textContent = coeff[1].toFixed(6); // b
+                tdC.textContent = coeff[2].toFixed(6); // c
+                tdD.textContent = coeff[3].toFixed(6); // d
+                
+                tr.appendChild(tdA);
+                tr.appendChild(tdB);
+                tr.appendChild(tdC);
+                tr.appendChild(tdD);
+                table.appendChild(tr);
+            });
+        
+            const result_container = document.getElementById("table");
+            result_container.appendChild(table);
+            return;
+        }
+        
         // Añadir los encabezados al thead si no es incremental_search
         thead.appendChild(headers_row);
         table.appendChild(thead);
