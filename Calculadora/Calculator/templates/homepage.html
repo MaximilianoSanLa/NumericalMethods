@@ -60,6 +60,42 @@
               </li>
             </ul>
         </div>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  matrix factorization
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <button id="show_LU_simple_method_form" class = "btn">LU simple</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_LU_partial_method_form" class = "btn">LU partial</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_crout_method_form" class = "btn">Crout</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_doolittle_method_form" class = "btn">Doolittle</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_cholesky_method_form" class = "btn">Cholesky</button>
+                </div>                
+              </li>
+            </ul>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Iterative Methods
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <button id="show_jacobi_method_form" class = "btn">Jacobi</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_seidel_method_form" class = "btn">Gauss-Seidel</button>
+                    <div class="dropdown-divider"></div>
+                    <button id="show_SOR_method_form" class = "btn">SOR</button>
+                </div>                
+              </li>
+            </ul>
+        </div>
       </nav>
     <div class="container">
 
@@ -281,10 +317,156 @@
             <button type="submit" class="btn btn-primary">Show Graph</button>
         </form>
 
+        {% comment %} Show LU simple method form {% endcomment %}
+        <form id="LU_simple_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_LU_simple_method">Enter matrix nxn :</label>
+                <input type="text" id="A_LU_simple_method" name="A_LU_simple_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_LU_simple_method">Enter vector b:</label>
+                <input type="text" id="b_LU_simple_method" name="b_LU_simple_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show LU partial method form {% endcomment %}
+        <form id="LU_partial_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_LU_partial_method">Enter matrix nxn :</label>
+                <input type="text" id="A_LU_partial_method" name="A_LU_partial_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_LU_partial_method">Enter vector b:</label>
+                <input type="text" id="b_LU_partial_method" name="b_LU_partial_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show crout method form {% endcomment %}
+        <form id="crout_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_crout_method">Enter matrix nxn :</label>
+                <input type="text" id="A_crout_method" name="A_crout_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_crout_method">Enter vector b:</label>
+                <input type="text" id="b_crout_method" name="b_crout_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show doolittle method form {% endcomment %}
+        <form id="doolittle_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_doolittle_method">Enter matrix nxn :</label>
+                <input type="text" id="A_doolittle_method" name="A_doolittle_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_doolittle_method">Enter vector b:</label>
+                <input type="text" id="b_doolittle_method" name="b_doolittle_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show cholesky method form {% endcomment %}
+        <form id="cholesky_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_cholesky_method">Enter matrix nxn :</label>
+                <input type="text" id="A_cholesky_method" name="A_cholesky_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_cholesky_method">Enter vector b:</label>
+                <input type="text" id="b_cholesky_method" name="b_cholesky_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show jacobi method form {% endcomment %}
+        <form id="jacobi_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_jacobi_method">Enter matrix nxn :</label>
+                <input type="text" id="A_jacobi_method" name="A_jacobi_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_jacobi_method">Enter vector b:</label>
+                <input type="text" id="b_jacobi_method" name="b_jacobi_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="x0_jacobi_method">Enter initial x0:</label>
+                <input type="text" id="x0_jacobi_method" name="x0_jacobi_method" placeholder="e.g. [1,2,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="tolerance_jacobi_method">Enter tolerance:</label>
+                <input type="text" id="tolerance_jacobi_method" name="tolerance_jacobi_method" placeholder="e.g. 1e-7" required>
+            </div>
+            <div class="form-group">
+                <label for="N_jacobi_method">Enter N for max iterations:</label>
+                <input type="text" id="N_jacobi_method" name="N_jacobi_method" placeholder="e.g. 100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show Gauss-Seidel method form {% endcomment %}
+        <form id="seidel_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_seidel_method">Enter matrix nxn :</label>
+                <input type="text" id="A_seidel_method" name="A_seidel_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_seidel_method">Enter vector b:</label>
+                <input type="text" id="b_seidel_method" name="b_seidel_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="x0_seidel_method">Enter initial x0:</label>
+                <input type="text" id="x0_seidel_method" name="x0_seidel_method" placeholder="e.g. [1,2,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="tolerance_seidel_method">Enter tolerance:</label>
+                <input type="text" id="tolerance_seidel_method" name="tolerance_seidel_method" placeholder="e.g. 1e-7" required>
+            </div>
+            <div class="form-group">
+                <label for="N_seidel_method">Enter N for max iterations:</label>
+                <input type="text" id="N_seidel_method" name="N_seidel_method" placeholder="e.g. 100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
+        {% comment %} Show SOR method form {% endcomment %}
+        <form id="SOR_method_form" style="display: none;">
+            <div class="form-group">
+                <label for="A_SOR_method">Enter matrix nxn :</label>
+                <input type="text" id="A_SOR_method" name="A_SOR_method" placeholder="e.g. [1,2,3],[6,2,1],[5,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="b_SOR_method">Enter vector b:</label>
+                <input type="text" id="b_SOR_method" name="b_SOR_method" placeholder="e.g. [2,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="x0_SOR_method">Enter initial x0:</label>
+                <input type="text" id="x0_SOR_method" name="x0_SOR_method" placeholder="e.g. [1,2,3,4]" required>
+            </div>
+            <div class="form-group">
+                <label for="tolerance_SOR_method">Enter tolerance:</label>
+                <input type="text" id="tolerance_SOR_method" name="tolerance_SOR_method" placeholder="e.g. 1e-7" required>
+            </div>
+            <div class="form-group">
+                <label for="w_SOR_method">Enter w:</label>
+                <input type="text" id="w_SOR_method" name="w_SOR_method" placeholder="e.g. 1.5" required>
+            </div>
+            <div class="form-group">
+                <label for="N_SOR_method">Enter N for max iterations:</label>
+                <input type="text" id="N_SOR_method" name="N_SOR_method" placeholder="e.g. 100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Show coef</button>
+        </form>
+
         <div id ="result"></div>
         <div id = "graph"></div>
-        <div id= "table"></div>
+        <div id = "table"></div>
     </div>
+
+    
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>

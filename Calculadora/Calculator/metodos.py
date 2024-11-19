@@ -38,6 +38,25 @@ def sustReg(M):
         x[i] = np.dot(aux, aux1) / M[i, i]
     return x
 
+# functions to sust matrix
+def sustprgr(L_b):
+    n = L_b.shape[0]
+    L = L_b[:, :-1]
+    b = L_b[:, -1]
+    z = np.zeros(n)
+    for i in range(n):
+        z[i] = (b[i] - np.dot(L[i, :i], z[:i])) / L[i, i]
+    return z
+
+def sustregr(U_z):
+    n = U_z.shape[0]
+    U = U_z[:, :-1]
+    z = U_z[:, -1]
+    x = np.zeros(n)
+    for i in range(n-1, -1, -1):
+        x[i] = (z[i] - np.dot(U[i, i+1:], x[i+1:])) / U[i, i]
+    return x
+
 # Function to verify the root existence in a given interval
 def root_existence(a, b, fun):
     f = symplified_function(fun)

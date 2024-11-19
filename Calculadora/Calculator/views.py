@@ -391,6 +391,7 @@ def gausspl_method(request):
     A = data["A"]
     b = data["b"]
     
+    
     try:
         x = gausspl(A, b)
         print(x)
@@ -441,9 +442,10 @@ def sustregr(U_z):
     return x
 
 def LU_simple(request):
+    data = json.loads(request.body)
+    A = np.array(data["A"])
+    b = np.array(data["b"])
     try:
-        A = np.array(request.GET.getlist('A'), dtype=float).reshape(-1, 3)  # Example reshaping
-        b = np.array(request.GET.getlist('b'), dtype=float)
 
         n = A.shape[0]
         L = np.eye(n)
@@ -473,10 +475,10 @@ def LU_simple(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 def LU_partial(request):
+    data = json.loads(request.body)
+    A = np.array(data["A"])
+    b = np.array(data["b"])
     try:
-        A = np.array(request.GET.getlist('A'), dtype=float).reshape(-1, 3)  # Example reshaping
-        b = np.array(request.GET.getlist('b'), dtype=float)
-
         n = A.shape[0]
         L = np.eye(n)
         U = np.zeros((n, n))
@@ -510,16 +512,166 @@ def LU_partial(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+    
+def crout(request):
+    data = json.loads(request.body)
+    A = np.array(data["A"])
+    b = np.array(data["b"])
+    n = len(A)
+    L = np.zeros((n, n))
+    U = np.eye(n)  # Matriz identidad para U
+    
+    
+    for j in range(n):
+        for i in range(j, n):  # Calcular elementos de L
+            L[i, j] = A[i, j] - sum(L[i, k] * U[k, j] for k in range(j))
+        for i in range(j + 1, n):  # Calcular elementos de U
+            U[j, i] = (A[j, i] - sum(L[j, k] * U[k, i] for k in range(j))) / L[j, j]
+
+    # Sustitución progresiva para resolver Ly = b
+    y = np.zeros(n)
+    for i in range(n):
+        y[i] = (b[i] - sum(L[i, k] * y[k] for k in range(i))) / L[i, i]
+
+    # Sustitución regresiva para resolver Ux = y
+    x = np.zeros(n)
+    for i in range(n - 1, -1, -1):
+        x[i] = y[i] - sum(U[i, k] * x[k] for k in range(i + 1, n))
+    
+    return JsonResponse({
+            "L": L.tolist(),
+            "U": U.tolist(),
+            "x": x.tolist()
+        })
+
+def doolittle(request):
+    data = json.loads(request.body)
+    A = np.array(data["A"])
+    b = np.array(data["b"])
+    n = len(A)
+    L = np.eye(n)  # Matriz identidad para L
+    U = np.zeros((n, n))
+    
+    
+    for j in range(n):
+        for i in range(j, n):  # Calcular elementos de U
+            U[j, i] = A[j, i] - sum(L[j, k] * U[k, i] for k in range(j))
+        for i in range(j + 1, n):  # Calcular elementos de L
+            L[i, j] = (A[i, j] - sum(L[i, k] * U[k, j] for k in range(j))) / U[j, j]
+
+    # Sustitución progresiva para resolver Ly = b
+    y = np.zeros(n)
+    for i in range(n):
+        y[i] = b[i] - sum(L[i, k] * y[k] for k in range(i))
+
+    # Sustitución regresiva para resolver Ux = y
+    x = np.zeros(n)
+    for i in range(n - 1, -1, -1):
+        x[i] = (y[i] - sum(U[i, k] * x[k] for k in range(i + 1, n))) / U[i, i]
+
+    return JsonResponse({
+            "L": L.tolist(),
+            "U": U.tolist(),
+            "x": x.tolist()
+        })
+
+import numpy as np
+from django.http import JsonResponse
+import json
+
+def cholesky(request):
+    data = json.loads(request.body)
+    A = np.array(data["A"])
+    b = np.array(data["b"])
+    n = A.shape[0]
+    L = np.eye(n, dtype=float)
+    U = np.eye(n, dtype=float)
+
+    # Factorización de Cholesky
+    for i in range(n - 1):
+        L[i, i] = np.sqrt(A[i, i] - np.dot(L[i, :i], U[:i, i]))
+        U[i, i] = L[i, i]
+
+        for j in range(i + 1, n):
+            L[j, i] = (A[j, i] - np.dot(L[j, :i], U[:i, i])) / U[i, i]
+            U[i, j] = (A[i, j] - np.dot(L[i, :i], U[:i, j])) / L[i, i]
+
+    # Último paso para la diagonal
+    L[n - 1, n - 1] = np.sqrt(A[n - 1, n - 1] - np.dot(L[n - 1, :n - 1], U[:n - 1, n - 1]))
+    U[n - 1, n - 1] = L[n - 1, n - 1]
+
+    # Sustitución progresiva
+    L_b = np.hstack((L, b.reshape(-1, 1)))
+    z = sustprgr(L_b)
+
+    # Sustitución regresiva
+    U_z = np.hstack((U, z.reshape(-1, 1)))
+    x = sustregr(U_z)
+    
+    return JsonResponse({
+            "L": L.tolist(),
+            "U": U.tolist(),
+            "x": x.tolist()
+        })
+
+
+def jacobi(request):
+    data = json.loads(request.body)
+    A = np.array(data["A"])
+    b = np.array(data["b"])
+    x0 = np.array(data["x0"])
+    tolerance = data["tolerance"]
+    N = data["N"]
+
+    table = []  # Inicializamos la tabla para guardar iteraciones
+    D = np.diag(np.diag(A))
+    LU = A - D
+    D_inv = np.linalg.inv(D)
+    T = np.dot(-D_inv, LU)
+    C = np.dot(D_inv, b)
+
+    # Calcular el radio espectral
+    eigenval = np.linalg.eigvals(T)
+    spectral_radius = max(abs(eigenval))
+
+    # Inicialización de iteraciones
+    x = x0
+    for i in range(N):
+        x_temp = x
+        x = np.dot(D_inv, np.dot(-LU, x)) + C
+        error_absoluto = np.linalg.norm(x - x_temp)
+
+        # Guardar en la tabla: iteración, error, solución actual
+        table.append({
+            "iter": i + 1,
+            "E": "{:.5e}".format(error_absoluto),
+            "x": x.tolist()
+        })
+
+        if error_absoluto < tolerance:
+            return JsonResponse({
+                "T": T.tolist(),
+                "C": C.tolist(),
+                "spectral_radius": spectral_radius,
+                "table": table
+            })
+
+    return JsonResponse({
+        "T": T.tolist(),
+        "C": C.tolist(),
+        "spectral_radius": spectral_radius,
+        "table": table
+    })
+
+
 def seidel(request):
     try:
-        A = np.array(request.GET.getlist('A'), dtype=float).reshape(-1, 3)  # Example reshaping
-        b = np.array(request.GET.getlist('b'), dtype=float)
-        x0 = np.array(request.GET.getlist('x0'), dtype=float)
-        tol = float(request.GET.get('tol', 1e-5))
-        Nmax = int(request.GET.get('Nmax', 100))
-
-        A = np.array(A)
-        b = np.array(b)
+        data = json.loads(request.body)
+        A = np.array(data["A"])
+        b = np.array(data["b"])
+        x0 = np.array(data["x0"])
+        tolerance = data["tolerance"]
+        N = data["N"]
         xant = np.array(x0, dtype=float)
         D = np.diag(np.diag(A))
         L = -np.tril(A, -1)
@@ -531,7 +683,7 @@ def seidel(request):
         cont = 0
         table = []
 
-        while E > tol and cont < Nmax:
+        while E > tolerance and cont < N:
             xact = T.dot(xant) + C
             E = np.linalg.norm(xact - xant)
             xant = xact
@@ -539,51 +691,63 @@ def seidel(request):
             table.append([cont, "{:.5e}".format(E), xant.tolist()])
 
         return JsonResponse({
+            "T": T.tolist(),
+            "C": C.tolist(),
             "table": table,
-            "spectral_radius": spectral_radius,
-            "message": "Gauss-Seidel iteration completed successfully"
+            "spectral_radius": spectral_radius
         })
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+    
 def SOR(request):
-    try:
-        A = np.array(request.GET.getlist('A'), dtype=float).reshape(-1, 3)  # Example reshaping
-        b = np.array(request.GET.getlist('b'), dtype=float)
-        x0 = np.array(request.GET.getlist('x0'), dtype=float)
-        w = float(request.GET.get('w', 1.0))
-        tol = float(request.GET.get('tol', 1e-5))
-        Nmax = int(request.GET.get('Nmax', 100))
+    data = json.loads(request.body)
+    A = np.array(data["A"])
+    b = np.array(data["b"])
+    x0 = np.array(data["x0"])
+    tolerance = data["tolerance"]
+    w = data["w"]
+    N = data["N"]
+    xant = np.array(x0, dtype=float)
 
-        A = np.array(A)
-        b = np.array(b)
-        xant = np.array(x0, dtype=float)
+    D = np.diag(np.diag(A))
+    L = -np.tril(A, -1) 
+    U = -np.triu(A, 1)
+    
+    T = np.linalg.inv(D - w * L).dot((1 - w) * D + w * U)
+    spectral_radius = np.max(np.abs(np.linalg.eigvals(T)))
+    C = w * np.linalg.inv(D - w * L).dot(b)
+    
+    E = 1000
+    cont = 0
+    table = []
 
-        D = np.diag(np.diag(A))
-        L = -np.tril(A, -1) 
-        U = -np.triu(A, 1)
+    while E > tolerance and cont < N:
+        xact = T.dot(xant) + C
+        E = np.linalg.norm(xact - xant)
+        xant = xact
+        cont += 1
+        
+        table.append([cont, "{:.5e}".format(E), xant.tolist()])
 
-        T = np.linalg.inv(D - w * L).dot((1 - w) * D + w * U)
-        C = w * np.linalg.inv(D - w * L).dot(b)
+    return JsonResponse({
+        "T": T.tolist(),
+        "C": C.tolist(),
+        "table": table,
+        "spectral_radius": spectral_radius
+    })
+   
+    
+def vandermonde(x):
+    n = len(x)
+    V = np.vander(x)
+    print("Vandermonde matrix:")
+    for row in V:
+        formatted_row = " ".join(f"{elem:.6f}" for elem in row)
+        print(formatted_row)
+    return V
 
-        E = 1000
-        cont = 0
-        table = []
 
-        while E > tol and cont < Nmax:
-            xact = T.dot(xant) + C
-            E = np.linalg.norm(xact - xant)
-            xant = xact
-            cont += 1
-            table.append([cont, "{:.5e}".format(E), xant.tolist()])
-
-        return JsonResponse({
-            "table": table,
-            "message": "SOR iteration completed successfully"
-        })
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
 def difdivididas(request):
     try:
         # Fetch X and Y from GET parameters
@@ -816,3 +980,5 @@ def trazcub(request):
         "method": "Cubic Splines",
         "coefficients": Coef_list
     })
+    
+
