@@ -549,8 +549,8 @@ def crout(request):
 
 def doolittle(request):
     data = json.loads(request.body)
-    A = np.array(data["A"])
-    b = np.array(data["b"])
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
     n = len(A)
     L = np.eye(n)  # Matriz identidad para L
     U = np.zeros((n, n))
@@ -578,14 +578,10 @@ def doolittle(request):
             "x": x.tolist()
         })
 
-import numpy as np
-from django.http import JsonResponse
-import json
-
 def cholesky(request):
     data = json.loads(request.body)
-    A = np.array(data["A"])
-    b = np.array(data["b"])
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
     n = A.shape[0]
     L = np.eye(n, dtype=float)
     U = np.eye(n, dtype=float)
@@ -620,9 +616,9 @@ def cholesky(request):
 
 def jacobi(request):
     data = json.loads(request.body)
-    A = np.array(data["A"])
-    b = np.array(data["b"])
-    x0 = np.array(data["x0"])
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
+    x0 = np.array(ast.literal_eval(data["x0"]), dtype=float)
     tolerance = data["tolerance"]
     N = data["N"]
 

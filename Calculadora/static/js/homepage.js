@@ -856,16 +856,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("LU Partial Method");
         
-        A = validateMatrix(document.getElementById("A_LU_partial_method").value);
-        b = validateVectorB(A, document.getElementById("b_LU_partial_method").value);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
+        A = document.getElementById("A_LU_partial_method").value;
+        b = document.getElementById("b_LU_partial_method").value;
+        
         
         fetch("/Calculator/LU_partial_method/", {
             method: "POST",
@@ -903,16 +896,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("Crout Method");
         
-        A = validateMatrix(document.getElementById("A_crout_method").value);
-        b = validateVectorB(A, document.getElementById("b_crout_method").value);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
+        A = document.getElementById("A_crout_method").value;
+        b = document.getElementById("b_crout_method").value;
+        
         
         fetch("/Calculator/Crout_method/", {
             method: "POST",
@@ -949,16 +935,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("Doolittle Method");
         
-        A = validateMatrix(document.getElementById("A_doolittle_method").value);
-        b = validateVectorB(A, document.getElementById("b_doolittle_method").value);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
+        A = document.getElementById("A_doolittle_method").value;
+        b = document.getElementById("b_doolittle_method").value;
+        
         
         fetch("/Calculator/Doolittle_method/", {
             method: "POST",
@@ -995,17 +974,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("Cholesky Method");
         
-        A = validateMatrix(document.getElementById("A_cholesky_method").value);
-        b = validateVectorB(A, document.getElementById("b_cholesky_method").value);
-        console.log(A,b);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
+        A = document.getElementById("A_cholesky_method").value;
+        b = document.getElementById("b_cholesky_method").value;
+        
         
         fetch("/Calculator/Cholesky_method/", {
             method: "POST",
@@ -1043,22 +1014,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("Jacobi Method");
         
-        A = validateMatrix(document.getElementById("A_jacobi_method").value);
-        b = validateVectorB(A, document.getElementById("b_jacobi_method").value);
-        x0 = validateVectorB(A, document.getElementById("x0_jacobi_method").value);
+        A = document.getElementById("A_jacobi_method").value;
+        b = document.getElementById("b_jacobi_method").value;
+        x0 = document.getElementById("x0_jacobi_method").value;
         console.log(A,b);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
-        if (!x0)
-        {
-            return;
-        }
+
         tolerance = parseFloat(document.getElementById
         ("tolerance_jacobi_method").value);
         N = parseInt(document.getElementById("N_jacobi_method").value);
@@ -1112,22 +1072,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("Seidel Method");
         
-        A = validateMatrix(document.getElementById("A_seidel_method").value);
-        b = validateVectorB(A, document.getElementById("b_seidel_method").value);
-        x0 = validateVectorB(A, document.getElementById("x0_seidel_method").value);
+        A = document.getElementById("A_seidel_method").value;
+        b = document.getElementById("b_seidel_method").value;
+        x0 = document.getElementById("x0_seidel_method").value;
         console.log(A,b);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
-        if (!x0)
-        {
-            return;
-        }
         tolerance = parseFloat(document.getElementById
         ("tolerance_seidel_method").value);
         N = parseInt(document.getElementById("N_seidel_method").value);
@@ -1181,21 +1129,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("SOR Method");
         
-        A = validateMatrix(document.getElementById("A_SOR_method").value);
-        b = validateVectorB(A, document.getElementById("b_SOR_method").value);
-        x0 = validateVectorB(A, document.getElementById("x0_SOR_method").value);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
-        if (!x0)
-        {
-            return;
-        }
+        A = document.getElementById("A_SOR_method").value;
+        b = document.getElementById("b_SOR_method").value;
+        x0 =document.getElementById("x0_SOR_method").value;
         tolerance = parseFloat(document.getElementById
         ("tolerance_SOR_method").value);
         let w = parseFloat(document.getElementById
