@@ -785,17 +785,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("Gaussian Simple Elimination Method");
     
-        A = validateMatrix(document.getElementById("A_gaussian_simple_elimination_method").value);
-        b = validateVectorB(A, document.getElementById("b_gaussian_simple_elimination_method").value);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
-        
+        A=document.getElementById("A_gaussian_simple_elimination_method").value;
+        b=document.getElementById("b_gaussian_simple_elimination_method").value;
         fetch("/Calculator/gausspl_method/", {
             method: "POST",
             headers: {
@@ -818,7 +809,6 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .catch(error => console.log("Error: ", error));
     });
-
     // LU_simple method
     document.getElementById("LU_simple_method_form").addEventListener("submit", function(e){
         e.preventDefault();
@@ -828,16 +818,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         updateMethodTitle("LU Simple Method");
         
-        A = validateMatrix(document.getElementById("A_LU_simple_method").value);
-        b = validateVectorB(A, document.getElementById("b_LU_simple_method").value);
-        if (!A)
-        {
-            return;
-        }
-        if (!b)
-        {
-            return;
-        }
+        A = document.getElementById("A_LU_simple_method").value;
+        b = document.getElementById("b_LU_simple_method").value;
         
         fetch("/Calculator/LU_simple_method/", {
             method: "POST",

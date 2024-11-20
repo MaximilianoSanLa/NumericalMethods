@@ -389,9 +389,10 @@ def multiple_roots_method(request):
 # Gaussian simple elimination method
 def gausspl_method(request):
     data = json.loads(request.body)
-    A = data["A"]
-    b = data["b"]
-    
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
+    print(A)
+    print(b)
     
     try:
         x = gausspl(A, b)
@@ -403,9 +404,10 @@ def gausspl_method(request):
 # Gaussian eliminition with partial pivoting method
 def gausspar_method(request):
     data = json.loads(request.body)
-    A = data["A"]
-    b = data["b"]
-    
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
+    print(A)
+    print(b)
     try:
         x = gausspar(A, b)
     except Exception as e:  
@@ -415,8 +417,8 @@ def gausspar_method(request):
 # Gaussian eliminition with total pivoting method
 def gausstot_method(request):
     data = json.loads(request.body)
-    A = data["A"]
-    b = data["b"]
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
     
     try:
         x = gausstot(A, b)
@@ -444,8 +446,8 @@ def sustregr(U_z):
 
 def LU_simple(request):
     data = json.loads(request.body)
-    A = np.array(data["A"])
-    b = np.array(data["b"])
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
     try:
 
         n = A.shape[0]
@@ -477,8 +479,8 @@ def LU_simple(request):
         return JsonResponse({"error": str(e)}, status=400)
 def LU_partial(request):
     data = json.loads(request.body)
-    A = np.array(data["A"])
-    b = np.array(data["b"])
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
     try:
         n = A.shape[0]
         L = np.eye(n)
@@ -516,8 +518,8 @@ def LU_partial(request):
     
 def crout(request):
     data = json.loads(request.body)
-    A = np.array(data["A"])
-    b = np.array(data["b"])
+    A = np.array(ast.literal_eval(data["A"]), dtype=float)
+    b = np.array(ast.literal_eval(data["b"]), dtype=float)
     n = len(A)
     L = np.zeros((n, n))
     U = np.eye(n)  # Matriz identidad para U
